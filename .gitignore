@@ -1,0 +1,68 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Composer & Node dependencies
+/vendor
+/node_modules
+
+# Storage & Private User Data
+/storage/*.key
+/storage/pail
+/storage/app/private/*
+!/storage/app/private/.gitignore
+/storage/app/public/*
+!/storage/app/public/.gitignore
+/storage/framework/cache/*
+!/storage/framework/cache/.gitignore
+/storage/framework/sessions/*
+!/storage/framework/sessions/.gitignore
+/storage/framework/views/*
+!/storage/framework/views/.gitignore
+/storage/framework/testing/*
+!/storage/framework/testing/.gitignore
+/storage/logs/*
+!/storage/logs/.gitignore
+*.log
+
+# Database dumps & local databases
+*.sql
+*.sqlite
+*.sqlite3
+*.db
+/database/*.sqlite
+/database/*.sqlite-journal
+/database/*.sqlite3
+/database/*.db
+
+# Backup Archives & Temp Files
+*.zip
+*.tar
+*.gz
+temp_*
+*.tmp
+
+# Public storage & Hot reload
+/public/hot
+/public/storage
+/public/fonts-manifest.dev.json
+
+# IDEs & Editor metadata
+.DS_Store
+Thumbs.db
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.vscode
+/.zed
+.phpactor.json
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+/auth.json
+
+# PHPUnit & Testing cache
+.phpunit.result.cache
+/.phpunit.cache

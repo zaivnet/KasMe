@@ -1,0 +1,267 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+@theme {
+    --font-sans: 'Aptos', 'Segoe UI Variable', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+        'Segoe UI Symbol', 'Noto Color Emoji';
+}
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@layer base {
+    [x-cloak] {
+        display: none !important;
+    }
+
+    button, a, input, select, textarea {
+        @apply transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900;
+    }
+
+    button:not(:disabled), [role='button'], a {
+        @apply active:scale-[0.98] transition-transform duration-100;
+    }
+
+    input:not([type='checkbox']):not([type='radio']):not([type='color']), select {
+        min-height: 2.75rem;
+    }
+
+    h1, h2, h3 {
+        text-wrap: balance;
+    }
+
+    p {
+        text-wrap: pretty;
+    }
+
+    html {
+        scroll-behavior: smooth;
+        overflow-x: clip;
+    }
+
+    body {
+        overflow-x: hidden;
+        background-color: #f8fafc;
+        background-image:
+            radial-gradient(circle at 12% 5%, rgb(16 185 129 / .06), transparent 28rem),
+            radial-gradient(circle at 88% 12%, rgb(14 165 233 / .05), transparent 30rem),
+            radial-gradient(circle at 50% 90%, rgb(139 92 246 / .04), transparent 32rem);
+    }
+
+    .dark body {
+        background-color: #020617;
+        background-image:
+            radial-gradient(circle at 12% 5%, rgb(5 150 105 / .08), transparent 28rem),
+            radial-gradient(circle at 88% 12%, rgb(2 132 199 / .07), transparent 30rem),
+            radial-gradient(circle at 50% 90%, rgb(109 40 217 / .06), transparent 32rem);
+    }
+
+    button:disabled {
+        @apply cursor-not-allowed opacity-50 pointer-events-none;
+    }
+
+    input:not([type='checkbox']):not([type='radio']):not([type='color']), select, textarea {
+        @apply rounded-xl border border-slate-300/90 bg-white px-3.5 py-2.5 text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,.04)] placeholder:text-slate-400 transition duration-150 hover:border-slate-400 focus:border-emerald-600 focus:ring-4 focus:ring-emerald-600/15 dark:border-slate-700/80 dark:bg-slate-950/90 dark:text-slate-100 dark:placeholder:text-slate-500 dark:hover:border-slate-600 dark:focus:border-emerald-500 dark:focus:ring-emerald-500/20;
+    }
+
+    label, legend {
+        @apply text-slate-700 dark:text-slate-200;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        *, ::before, ::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+            scroll-behavior: auto !important;
+        }
+    }
+}
+
+@layer components {
+    .app-card, .premium-surface {
+        @apply relative rounded-2xl border border-slate-200/85 bg-white/95 shadow-[0_14px_38px_-28px_rgba(15,23,42,.35),0_1px_3px_rgba(15,23,42,.03)] backdrop-blur-xs transition duration-200 dark:border-slate-800/90 dark:bg-slate-900/95 dark:shadow-[0_18px_45px_-30px_rgba(0,0,0,.75)];
+    }
+    .section-card {
+        @apply relative overflow-hidden rounded-2xl border border-slate-200/85 bg-white/95 p-5 shadow-[0_14px_38px_-28px_rgba(15,23,42,.35),0_1px_3px_rgba(15,23,42,.03)] backdrop-blur-xs transition duration-200 dark:border-slate-800/90 dark:bg-slate-900/95 dark:shadow-[0_18px_45px_-30px_rgba(0,0,0,.75)] sm:p-6;
+    }
+    .filter-surface {
+        @apply rounded-2xl border border-teal-100/90 bg-gradient-to-br from-white via-white to-teal-50/50 p-4 shadow-[0_12px_32px_-24px_rgba(13,148,136,.35)] backdrop-blur-xs dark:border-teal-900/40 dark:from-slate-900 dark:via-slate-900 dark:to-teal-950/30;
+    }
+    @media (max-width: 767px) {
+        .report-filter-sheet { background-image: linear-gradient(160deg, #ffffff 0%, #ffffff 72%, #f0fdfa 100%); }
+        .dark .report-filter-sheet { background-image: linear-gradient(160deg, #0f172a 0%, #0f172a 72%, #042f2e 100%); }
+    }
+
+    /* Vibrant semantic surfaces with gentle gradients */
+    .accent-cyan {
+        @apply border-cyan-200/90 bg-gradient-to-br from-white via-white to-cyan-50/80 shadow-[0_12px_30px_-24px_rgba(6,182,212,.4)] dark:border-cyan-900/60 dark:from-slate-900 dark:via-slate-900 dark:to-cyan-950/40;
+    }
+    .accent-emerald {
+        @apply border-emerald-200/90 bg-gradient-to-br from-white via-white to-emerald-50/80 shadow-[0_12px_30px_-24px_rgba(16,185,129,.4)] dark:border-emerald-900/60 dark:from-slate-900 dark:via-slate-900 dark:to-emerald-950/40;
+    }
+    .accent-rose {
+        @apply border-rose-200/90 bg-gradient-to-br from-white via-white to-rose-50/80 shadow-[0_12px_30px_-24px_rgba(244,63,94,.4)] dark:border-rose-900/60 dark:from-slate-900 dark:via-slate-900 dark:to-rose-950/40;
+    }
+    .accent-violet {
+        @apply border-violet-200/90 bg-gradient-to-br from-white via-white to-violet-50/80 shadow-[0_12px_30px_-24px_rgba(139,92,246,.4)] dark:border-violet-900/60 dark:from-slate-900 dark:via-slate-900 dark:to-violet-950/40;
+    }
+    .accent-amber {
+        @apply border-amber-200/90 bg-gradient-to-br from-white via-white to-amber-50/80 shadow-[0_12px_30px_-24px_rgba(245,158,11,.4)] dark:border-amber-900/60 dark:from-slate-900 dark:via-slate-900 dark:to-amber-950/40;
+    }
+    .accent-blue {
+        @apply border-blue-200/90 bg-gradient-to-br from-white via-white to-blue-50/80 shadow-[0_12px_30px_-24px_rgba(59,130,246,.4)] dark:border-blue-900/60 dark:from-slate-900 dark:via-slate-900 dark:to-blue-950/40;
+    }
+    .accent-slate {
+        @apply border-slate-200/90 bg-gradient-to-br from-white via-white to-slate-100/70 shadow-[0_12px_30px_-24px_rgba(100,116,139,.3)] dark:border-slate-800 dark:from-slate-900 dark:via-slate-900 dark:to-slate-800/40;
+    }
+
+    /* Icon Badges with refined depth and glow */
+    .icon-badge {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border shadow-sm transition duration-150;
+    }
+    .icon-badge-cyan {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border border-cyan-200/90 bg-gradient-to-br from-cyan-50 to-cyan-100/70 text-cyan-700 shadow-xs shadow-cyan-500/10 dark:border-cyan-800/80 dark:bg-cyan-950/80 dark:text-cyan-300;
+    }
+    .icon-badge-emerald {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border border-emerald-200/90 bg-gradient-to-br from-emerald-50 to-emerald-100/70 text-emerald-700 shadow-xs shadow-emerald-500/10 dark:border-emerald-800/80 dark:bg-emerald-950/80 dark:text-emerald-300;
+    }
+    .icon-badge-rose {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border border-rose-200/90 bg-gradient-to-br from-rose-50 to-rose-100/70 text-rose-700 shadow-xs shadow-rose-500/10 dark:border-rose-800/80 dark:bg-rose-950/80 dark:text-rose-300;
+    }
+    .icon-badge-violet {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border border-violet-200/90 bg-gradient-to-br from-violet-50 to-violet-100/70 text-violet-700 shadow-xs shadow-violet-500/10 dark:border-violet-800/80 dark:bg-violet-950/80 dark:text-violet-300;
+    }
+    .icon-badge-amber {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border border-amber-200/90 bg-gradient-to-br from-amber-50 to-amber-100/70 text-amber-700 shadow-xs shadow-amber-500/10 dark:border-amber-800/80 dark:bg-amber-950/80 dark:text-amber-300;
+    }
+    .icon-badge-blue {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border border-blue-200/90 bg-gradient-to-br from-blue-50 to-blue-100/70 text-blue-700 shadow-xs shadow-blue-500/10 dark:border-blue-800/80 dark:bg-blue-950/80 dark:text-blue-300;
+    }
+    .icon-badge-slate {
+        @apply grid size-11 shrink-0 place-items-center rounded-xl border border-slate-200/90 bg-gradient-to-br from-slate-50 to-slate-100/80 text-slate-700 shadow-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300;
+    }
+
+    /* Clickable interactive cards */
+    .clickable-card {
+        @apply transition duration-150 hover:-translate-y-0.5 hover:shadow-md active:scale-[0.99] cursor-pointer;
+    }
+
+    /* Buttons with modern hierarchy, tactile feedback & gradients */
+    .btn {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 disabled:cursor-not-allowed;
+    }
+    .btn-primary {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 px-4.5 py-2.5 text-sm font-semibold text-white shadow-md shadow-emerald-700/20 transition duration-150 hover:-translate-y-0.5 hover:from-emerald-700 hover:via-teal-700 hover:to-emerald-800 hover:shadow-lg hover:shadow-emerald-700/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 dark:from-emerald-500 dark:via-teal-500 dark:to-emerald-600 dark:shadow-emerald-950/40;
+    }
+    .btn-secondary {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-slate-200/90 bg-white/95 px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-2xs transition duration-150 hover:-translate-y-0.5 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:border-slate-600 dark:hover:bg-slate-800/90 dark:hover:text-white;
+    }
+    .btn-danger {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-rose-200/90 bg-rose-50/90 px-4 py-2.5 text-sm font-semibold text-rose-700 shadow-2xs transition duration-150 hover:-translate-y-0.5 hover:bg-rose-100 hover:border-rose-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 dark:border-rose-900/80 dark:bg-rose-950/60 dark:text-rose-300 dark:hover:bg-rose-950;
+    }
+    .btn-warning {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl border border-amber-200/90 bg-amber-50/90 px-4 py-2.5 text-sm font-semibold text-amber-800 shadow-2xs transition duration-150 hover:-translate-y-0.5 hover:bg-amber-100 hover:border-amber-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500 focus-visible:ring-offset-2 active:translate-y-0 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 dark:border-amber-900/80 dark:bg-amber-950/60 dark:text-amber-300;
+    }
+    .btn-ghost {
+        @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-xl bg-transparent px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-none transition duration-150 hover:bg-slate-100 hover:text-slate-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-400 focus-visible:ring-offset-2 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 dark:text-slate-400 dark:hover:bg-slate-800 dark:hover:text-white;
+    }
+
+    .form-label {
+        @apply text-sm font-semibold text-slate-700 dark:text-slate-200;
+    }
+    .form-helper {
+        @apply mt-1.5 text-xs leading-5 text-slate-500 dark:text-slate-400;
+    }
+    .form-control {
+        @apply mt-1 block w-full rounded-xl border border-slate-300 bg-white px-3 py-2.5 dark:border-slate-700 dark:bg-slate-950;
+    }
+    .list-row, .ledger-row {
+        @apply transition duration-150 hover:bg-teal-50/50 dark:hover:bg-teal-950/20;
+    }
+    .ledger-row {
+        @apply grid min-w-0 gap-2 px-4 py-3.5 sm:px-5;
+    }
+
+    /* Status chips with clear badges */
+    .status-chip {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold leading-tight shadow-xs;
+    }
+    .status-chip-emerald {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border border-emerald-200/90 bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold leading-tight text-emerald-700 shadow-xs dark:border-emerald-800/70 dark:bg-emerald-950/70 dark:text-emerald-300;
+    }
+    .status-chip-rose {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border border-rose-200/90 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold leading-tight text-rose-700 shadow-xs dark:border-rose-800/70 dark:bg-rose-950/70 dark:text-rose-300;
+    }
+    .status-chip-amber {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border border-amber-200/90 bg-amber-50 px-2.5 py-0.5 text-xs font-semibold leading-tight text-amber-800 shadow-xs dark:border-amber-800/70 dark:bg-amber-950/70 dark:text-amber-300;
+    }
+    .status-chip-cyan {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border border-cyan-200/90 bg-cyan-50 px-2.5 py-0.5 text-xs font-semibold leading-tight text-cyan-700 shadow-xs dark:border-cyan-800/70 dark:bg-cyan-950/70 dark:text-cyan-300;
+    }
+    .status-chip-violet {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border border-violet-200/90 bg-violet-50 px-2.5 py-0.5 text-xs font-semibold leading-tight text-violet-700 shadow-xs dark:border-violet-800/70 dark:bg-violet-950/70 dark:text-violet-300;
+    }
+    .status-chip-blue {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border border-blue-200/90 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold leading-tight text-blue-700 shadow-xs dark:border-blue-800/70 dark:bg-blue-950/70 dark:text-blue-300;
+    }
+    .status-chip-muted {
+        @apply inline-flex min-h-6 items-center gap-1.5 rounded-full border border-slate-200/90 bg-slate-100 px-2.5 py-0.5 text-xs font-semibold leading-tight text-slate-600 shadow-xs dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300;
+    }
+
+    .empty-state {
+        @apply rounded-2xl border border-dashed border-teal-200/90 bg-gradient-to-b from-teal-50/40 to-cyan-50/20 px-6 py-10 text-center dark:border-teal-900/60 dark:from-teal-950/20 dark:to-cyan-950/10;
+    }
+    .progress-track {
+        @apply h-2.5 overflow-hidden rounded-full bg-slate-100 ring-1 ring-inset ring-slate-200/70 dark:bg-slate-800 dark:ring-slate-700/60;
+    }
+    .progress-fill {
+        @apply h-full rounded-full transition-[width] duration-500;
+    }
+    .chart-frame {
+        @apply relative min-w-0 overflow-hidden rounded-2xl border border-slate-100/90 bg-white/80 p-3 shadow-inner dark:border-slate-800/70 dark:bg-slate-950/40;
+    }
+    .chart-frame canvas {
+        width: 100% !important;
+        height: 100% !important;
+        min-width: 0;
+    }
+    .section-heading {
+        @apply flex min-w-0 items-center gap-3;
+    }
+    .section-kicker {
+        @apply text-xs font-bold uppercase tracking-[.18em] text-emerald-700 dark:text-emerald-400;
+    }
+    .page-title {
+        @apply mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl;
+    }
+    .page-description {
+        @apply mt-1 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400;
+    }
+
+    /* Sidebar Navigation */
+    .nav-item {
+        @apply relative flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium text-slate-600 transition duration-150 hover:bg-emerald-50/60 hover:text-emerald-950 dark:text-slate-400 dark:hover:bg-emerald-950/30 dark:hover:text-emerald-200;
+    }
+    .nav-item-active {
+        @apply bg-gradient-to-r from-emerald-500/15 via-teal-500/10 to-transparent font-semibold text-emerald-800 shadow-xs ring-1 ring-emerald-500/20 dark:from-emerald-950/75 dark:via-teal-950/45 dark:text-emerald-300 dark:ring-emerald-800/40;
+    }
+    .nav-icon {
+        @apply shrink-0 text-slate-400 transition duration-150 dark:text-slate-500;
+    }
+    .nav-item:hover .nav-icon {
+        @apply text-emerald-700 dark:text-emerald-400;
+    }
+    .nav-item-active .nav-icon {
+        @apply text-emerald-700 dark:text-emerald-400;
+    }
+
+    .mobile-safe {
+        padding-bottom: calc(6.5rem + env(safe-area-inset-bottom));
+    }
+    .bottom-safe {
+        padding-bottom: max(.5rem, env(safe-area-inset-bottom));
+    }
+}
