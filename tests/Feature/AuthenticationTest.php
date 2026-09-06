@@ -86,4 +86,74 @@ class AuthenticationTest extends TestCase
 
         Notification::assertSentTo($user, ResetPassword::class);
     }
+
+    public function test_first_registered_user_automatically_becomes_instance_owner(): void
+    {
+        $this->post('/register', [
+            'name' => 'Owner First',
+            'email' => 'owner@example.test',
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+        ])->assertRedirect('/app');
+
+        $user = User::where('email', 'owner@example.test')->firstOrFail();
+        $this->assertTrue($user->is_instance_owner);
+    }
+
+    public function test_registration_closed_by_default_after_first_user_when_allow_registration_is_false(): void
+    {
+        // First user exists
+        User::factory()->instanceOwner()->create();
+        config(['kasme.allow_registration' => false]);
+
+        // GET register should be forbidden
+        $this->get('/register')->assertForbidden();
+
+        // POST register should be forbidden
+        $this->post('/register', [
+            'name' => 'Intruder',
+            'email' => 'intruder@example.test',
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+        ])->assertForbidden();
+
+        $this->assertDatabaseMissing('users', ['email' => 'intruder@example.test']);
+    }
+
+    public function test_registration_allowed_after_first_user_when_allow_registration_is_true(): void
+    {
+        User::factory()->instanceOwner()->create();
+        config(['kasme.allow_registration' => true]);
+
+        $this->get('/register')->assertOk();
+
+        $this->post('/register', [
+            'name' => 'Second User',
+            'email' => 'second@example.test',
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+        ])->assertRedirect('/app');
+
+        $secondUser = User::where('email', 'second@example.test')->firstOrFail();
+        $this->assertFalse($secondUser->is_instance_owner);
+    }
+
+    public function test_malicious_user_cannot_escalate_to_instance_owner_via_registration_mass_assignment(): void
+    {
+        // Owner already exists
+        User::factory()->instanceOwner()->create();
+        config(['kasme.allow_registration' => true]);
+
+        $this->post('/register', [
+            'name' => 'Hacker',
+            'email' => 'hacker@example.test',
+            'password' => 'SecurePass123!',
+            'password_confirmation' => 'SecurePass123!',
+            'is_instance_owner' => 1,
+            'is_instance_owner' => 'true',
+        ])->assertRedirect('/app');
+
+        $hacker = User::where('email', 'hacker@example.test')->firstOrFail();
+        $this->assertFalse($hacker->is_instance_owner);
+    }
 }

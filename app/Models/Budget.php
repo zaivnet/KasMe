@@ -40,8 +40,13 @@ class Budget extends Model
 
     public function utilizationPercentage(): float
     {
+        $amount = BigDecimal::of((string) $this->amount);
+        if ($amount->isZero()) {
+            return 0.0;
+        }
+
         return BigDecimal::of($this->usedAmount())
-            ->dividedBy((string) $this->amount, 6, RoundingMode::HalfUp)
+            ->dividedBy($amount, 6, RoundingMode::HalfUp)
             ->multipliedBy(100)->toFloat();
     }
 

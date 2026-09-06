@@ -49,7 +49,7 @@ class BackupTest extends TestCase
 
     public function test_authorized_user_can_access_backup_dashboard_and_create_backup(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->instanceOwner()->create();
 
         $response = $this->actingAs($user)->get(route('backups.index'));
         $response->assertOk();
@@ -160,7 +160,7 @@ class BackupTest extends TestCase
 
     public function test_backup_download_is_authenticated_and_serves_valid_archive(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->instanceOwner()->create();
         $backupService = app(BackupService::class);
         $filename = $backupService->createBackup('manual', $user);
 
@@ -275,7 +275,7 @@ class BackupTest extends TestCase
 
     public function test_restore_requires_explicit_confirmation_text_restore(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->instanceOwner()->create();
         $backupService = app(BackupService::class);
         $filename = $backupService->createBackup('manual', $user);
 
@@ -428,7 +428,7 @@ class BackupTest extends TestCase
 
     public function test_backup_delete_requires_authenticated_user_and_valid_filename(): void
     {
-        $user = User::factory()->create();
+        $user = User::factory()->instanceOwner()->create();
         $backupService = app(BackupService::class);
         $filename = $backupService->createBackup('manual', $user);
 
@@ -443,6 +443,46 @@ class BackupTest extends TestCase
         $deleteResponse->assertSessionHas('success');
 
         $this->assertFileDoesNotExist($backupService->getBackupDirectory() . DIRECTORY_SEPARATOR . $filename);
+    }
+
+    public function test_non_owner_authenticated_user_is_forbidden_from_all_backup_operations(): void
+    {
+        $nonOwner = User::factory()->create(['is_instance_owner' => false]);
+        $owner = User::factory()->instanceOwner()->create();
+
+        $backupService = app(BackupService::class);
+        $filename = $backupService->createBackup('manual', $owner);
+
+        // Index
+        $this->actingAs($nonOwner)->get(route('backups.index'))->assertForbidden();
+
+        // Store
+        $this->actingAs($nonOwner)->post(route('backups.store'))->assertForbidden();
+
+        // Download
+        $this->actingAs($nonOwner)->get(route('backups.download', $filename))->assertForbidden();
+
+        // Update schedule
+        $this->actingAs($nonOwner)->put(route('backups.updateSchedule'), [
+            'backup_schedule_enabled' => true,
+            'backup_schedule_frequency' => 'daily',
+            'backup_schedule_time' => '03:00',
+            'backup_retention' => 7,
+        ])->assertForbidden();
+
+        // Upload
+        $this->actingAs($nonOwner)->post(route('backups.upload'), [])->assertForbidden();
+
+        // Restore preview
+        $this->actingAs($nonOwner)->get(route('backups.restorePreview', $filename))->assertForbidden();
+
+        // Restore
+        $this->actingAs($nonOwner)->post(route('backups.restore', $filename), [
+            'confirm_restore' => 'RESTORE',
+        ])->assertForbidden();
+
+        // Destroy
+        $this->actingAs($nonOwner)->delete(route('backups.destroy', $filename))->assertForbidden();
     }
 
     public function test_financial_regression_remains_exact_after_backup_feature(): void

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Brick\Math\BigDecimal;
 use Carbon\CarbonImmutable;
 use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Builder;
@@ -36,7 +37,7 @@ class Debt extends Model
 
     public function effectiveStatus(): string
     {
-        if ((float) $this->remaining_amount === 0.0) {
+        if (BigDecimal::of((string) $this->remaining_amount)->isZero()) {
             return 'paid';
         }
 

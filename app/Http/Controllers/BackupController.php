@@ -8,6 +8,7 @@ use App\Services\Backup\RestoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -25,6 +26,8 @@ class BackupController extends Controller
      */
     public function index(Request $request): View
     {
+        Gate::authorize('manage-system-backups');
+
         $user = $request->user();
         $setting = $user->setting ?? new Setting();
 
@@ -47,6 +50,8 @@ class BackupController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        Gate::authorize('manage-system-backups');
+
         try {
             $filename = $this->backupService->createBackup('manual', $request->user());
 
@@ -61,6 +66,8 @@ class BackupController extends Controller
      */
     public function download(Request $request, string $filename): BinaryFileResponse
     {
+        Gate::authorize('manage-system-backups');
+
         $this->backupService->validateFilename($filename);
         $path = $this->backupService->getBackupDirectory() . DIRECTORY_SEPARATOR . $filename;
 
@@ -79,6 +86,8 @@ class BackupController extends Controller
      */
     public function destroy(Request $request, string $filename): RedirectResponse
     {
+        Gate::authorize('manage-system-backups');
+
         try {
             $this->backupService->validateFilename($filename);
             $deleted = $this->backupService->deleteBackup($filename, $request->user());
@@ -98,6 +107,8 @@ class BackupController extends Controller
      */
     public function updateSchedule(Request $request): RedirectResponse
     {
+        Gate::authorize('manage-system-backups');
+
         $validated = $request->validate([
             'backup_schedule_enabled' => ['required', 'boolean'],
             'backup_schedule_frequency' => ['required', Rule::in(array_keys(Setting::BACKUP_FREQUENCIES))],
@@ -117,6 +128,8 @@ class BackupController extends Controller
      */
     public function upload(Request $request): RedirectResponse
     {
+        Gate::authorize('manage-system-backups');
+
         $request->validate([
             'backup_file' => ['required', 'file', 'max:102400', 'mimes:zip'],
         ], [
@@ -151,6 +164,8 @@ class BackupController extends Controller
      */
     public function restorePreview(Request $request, string $filename): View|RedirectResponse
     {
+        Gate::authorize('manage-system-backups');
+
         try {
             $this->backupService->validateFilename($filename);
         } catch (Throwable) {
@@ -175,6 +190,8 @@ class BackupController extends Controller
      */
     public function restore(Request $request, string $filename): RedirectResponse
     {
+        Gate::authorize('manage-system-backups');
+
         $this->backupService->validateFilename($filename);
         $path = $this->backupService->getBackupDirectory() . DIRECTORY_SEPARATOR . $filename;
 

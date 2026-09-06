@@ -343,3 +343,31 @@ If a release causes critical application issues:
    - Do **NOT** casually run `php artisan migrate:rollback` on production financial data.
    - For database corruption, restore the pre-deployment MySQL backup.
    - Restore private attachments if files were modified.
+
+---
+
+## 14. Instance Owner & Upgrade Strategy (Sprint 19.1+)
+
+### Fresh Installation
+1. Deploy KasMe and run `php artisan migrate --force`.
+2. Ensure `ALLOW_REGISTRATION=false` in your `.env`.
+3. Open the site in your browser and register the **first user account**.
+4. The first registered user automatically becomes the **Instance Owner** (`is_instance_owner = true`).
+5. Public registration automatically closes immediately after the first user is created.
+6. Only the Instance Owner has access to **Backup & Restore Penuh** under *Settings*.
+
+### Upgrading an Existing Installation
+When migrating an existing database to Sprint 19.1+:
+1. Run migrations:
+   ```bash
+   php artisan migrate --force
+   ```
+   - If the database has **exactly 1 user**, the migration automatically grants them `is_instance_owner = true`.
+   - If the database has **multiple users**, the migration leaves all users unassigned to avoid guesswork.
+2. Designate the Instance Owner explicitly via CLI:
+   ```bash
+   php artisan kasme:set-owner --email=your-admin@example.com
+   ```
+   (or execute `php artisan kasme:set-owner` without arguments for interactive selection).
+3. Verify that `ALLOW_REGISTRATION=false` is present in `.env`.
+

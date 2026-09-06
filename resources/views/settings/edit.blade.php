@@ -85,6 +85,7 @@
         </a>
     </section>
 
+    @can('manage-system-backups')
     <section class="section-card accent-emerald mt-8">
         <div class="section-heading">
             <span class="icon-badge-teal"><x-icon name="cloud-arrow-down" size="5"/></span>
@@ -99,6 +100,7 @@
             <span>Buka Backup & Restore</span>
         </a>
     </section>
+    @endcan
 
     <section class="section-card accent-violet mt-8">
         <div class="section-heading">

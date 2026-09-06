@@ -64,13 +64,15 @@ Route::middleware(['auth', ApplyUserSettings::class])->group(function (): void {
     Route::get('/settings', [SettingController::class, 'edit'])->name('settings.edit');
     Route::put('/settings', [SettingController::class, 'update'])->name('settings.update');
     Route::get('/settings/export', PersonalDataExportController::class)->name('settings.export');
-    Route::get('/settings/backups', [\App\Http\Controllers\BackupController::class, 'index'])->name('backups.index');
-    Route::post('/settings/backups', [\App\Http\Controllers\BackupController::class, 'store'])->name('backups.store');
-    Route::put('/settings/backups/schedule', [\App\Http\Controllers\BackupController::class, 'updateSchedule'])->name('backups.updateSchedule');
-    Route::post('/settings/backups/upload', [\App\Http\Controllers\BackupController::class, 'upload'])->name('backups.upload');
-    Route::get('/settings/backups/{filename}/download', [\App\Http\Controllers\BackupController::class, 'download'])->name('backups.download');
-    Route::delete('/settings/backups/{filename}', [\App\Http\Controllers\BackupController::class, 'destroy'])->name('backups.destroy');
-    Route::get('/settings/backups/{filename}/restore', [\App\Http\Controllers\BackupController::class, 'restorePreview'])->name('backups.restorePreview');
-    Route::post('/settings/backups/{filename}/restore', [\App\Http\Controllers\BackupController::class, 'restore'])->name('backups.restore');
+    Route::middleware('can:manage-system-backups')->group(function (): void {
+        Route::get('/settings/backups', [\App\Http\Controllers\BackupController::class, 'index'])->name('backups.index');
+        Route::post('/settings/backups', [\App\Http\Controllers\BackupController::class, 'store'])->name('backups.store');
+        Route::put('/settings/backups/schedule', [\App\Http\Controllers\BackupController::class, 'updateSchedule'])->name('backups.updateSchedule');
+        Route::post('/settings/backups/upload', [\App\Http\Controllers\BackupController::class, 'upload'])->name('backups.upload');
+        Route::get('/settings/backups/{filename}/download', [\App\Http\Controllers\BackupController::class, 'download'])->name('backups.download');
+        Route::delete('/settings/backups/{filename}', [\App\Http\Controllers\BackupController::class, 'destroy'])->name('backups.destroy');
+        Route::get('/settings/backups/{filename}/restore', [\App\Http\Controllers\BackupController::class, 'restorePreview'])->name('backups.restorePreview');
+        Route::post('/settings/backups/{filename}/restore', [\App\Http\Controllers\BackupController::class, 'restore'])->name('backups.restore');
+    });
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

@@ -124,4 +124,18 @@ class SavingGoalTest extends TestCase
         $this->actingAs($owner)->post(route('saving-goals.transactions.store', $goal), $this->movementPayload($otherAccount))->assertSessionHasErrors('account_id');
         $this->actingAs($other)->get(route('saving-goals.transactions.edit', [$goal, $movement]))->assertForbidden();
     }
+
+    public function test_zero_target_saving_goal_progress_returns_zero_without_exception(): void
+    {
+        $user = $this->user();
+        $goal = $user->savingGoals()->make([
+            'name' => 'Zero Target',
+            'target_amount' => '0.00',
+            'status' => 'active',
+        ]);
+        $goal->contributions_sum = '100.00';
+        $goal->withdrawals_sum = '0.00';
+
+        $this->assertSame(0.0, $goal->progressPercentage());
+    }
 }

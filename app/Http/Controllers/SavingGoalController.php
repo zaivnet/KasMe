@@ -43,8 +43,8 @@ class SavingGoalController extends Controller
     public function show(Request $request, SavingGoal $savingGoal): View
     {
         Gate::authorize('view', $savingGoal);
-        $savingGoal = SavingGoal::withProgress()->findOrFail($savingGoal->id);
-        $savingGoal->load(['transactions' => fn ($query) => $query->with('account')->orderByDesc('transaction_date')->orderByDesc('id')]);
+        $savingGoal->loadProgress()
+            ->load(['transactions' => fn ($query) => $query->with('account')->orderByDesc('transaction_date')->orderByDesc('id')]);
 
         return view('saving-goals.show', [
             'goal' => $savingGoal,
@@ -56,7 +56,7 @@ class SavingGoalController extends Controller
     {
         Gate::authorize('update', $savingGoal);
 
-        return view('saving-goals.edit', ['goal' => SavingGoal::withProgress()->findOrFail($savingGoal->id)]);
+        return view('saving-goals.edit', ['goal' => $savingGoal->loadProgress()]);
     }
 
     public function update(UpdateSavingGoalRequest $request, SavingGoal $savingGoal, UpdateSavingGoal $action): RedirectResponse

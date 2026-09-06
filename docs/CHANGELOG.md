@@ -10,6 +10,11 @@ The format is inspired by Keep a Changelog principles.
 
 ### Added
 
+- Single Instance Owner security model (`users.is_instance_owner`) with atomic first-user bootstrap and CLI owner assignment command (`php artisan kasme:set-owner`).
+- Centralized `manage-system-backups` authorization Gate protecting all backup and restore operations from non-owner users.
+- Public registration toggle (`ALLOW_REGISTRATION`) via `config/kasme.php`, automatically restricting registrations once the instance owner exists.
+- Defensive zero-denominator guards on `Budget::utilizationPercentage()` and `SavingGoal::progressPercentage()`.
+- Explicit mandatory PHP extension declarations in `composer.json` (`ext-bcmath`, `ext-zip`).
 - Production-ready Backup & Restore system supporting manual full backups, secure downloads, history, and destructive restore.
 - Full backup archive ZIP packaging with `manifest.json`, `database/kasme.sql`, and private storage attachments (`storage/app/private/`).
 - Dual database dump engine: prioritizing CLI `mysqldump` with seamless fallback to pure-PHP PDO dumper supporting MySQL/MariaDB and SQLite.
@@ -69,6 +74,8 @@ The format is inspired by Keep a Changelog principles.
 
 ### Changed
 
+- Replaced `(float)` cast with strict `BigDecimal::isZero()` in `Debt::effectiveStatus()`.
+- Optimized `SavingGoalController::show()` and `edit()` by utilizing `loadProgress()` instead of redundant database queries.
 - Completed Sprint 18 final production readiness audit and verified shared-hosting / cPanel deployment workflow.
 - Audited PHP 8.3+ compatibility, verified BCMath requirement for decimal financial calculations, and verified all core extensions (ctype, curl, dom, fileinfo, mbstring, openssl, pdo, pdo_mysql, session, tokenizer, xml).
 - Updated `.env.example` with production-oriented keys, strict `APP_DEBUG=false`, secure cookie configuration, file session/cache, and sync queues.

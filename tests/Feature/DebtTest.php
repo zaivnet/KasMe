@@ -141,4 +141,13 @@ class DebtTest extends TestCase
         $this->actingAs($user)->get('/debts?status=overdue')->assertOk()->assertSee('Lender')->assertSee('Terlambat');
         $this->assertSame('active', $debt->fresh()->status);
     }
+
+    public function test_effective_status_marks_zero_remaining_amount_as_paid_without_floating_point(): void
+    {
+        $user = $this->user();
+        $debt = $this->createDebt($user);
+        $debt->remaining_amount = '0.00';
+
+        $this->assertSame('paid', $debt->effectiveStatus());
+    }
 }

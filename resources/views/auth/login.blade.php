@@ -28,7 +28,9 @@
         <button class="btn-primary w-full">Masuk</button>
     </div>
 </form>
+@if(\App\Models\User::query()->count() === 0 || config('kasme.allow_registration', false))
 <p class="mt-6 text-center text-xs text-slate-500 dark:text-slate-400 sm:text-sm">
     Belum memiliki akun? <a href="{{ route('register') }}" class="font-bold text-emerald-700 hover:underline dark:text-emerald-400">Daftar</a>
 </p>
+@endif
 @endsection

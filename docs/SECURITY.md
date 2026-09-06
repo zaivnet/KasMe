@@ -311,7 +311,7 @@ Database and attachment backups contain full sensitive financial records.
 Strict security standards enforced:
 
 - **Storage Location**: All backup archives are stored exclusively under `storage/app/private/backups/`. They are never stored or symlinked inside `public/` or `public/storage/`.
-- **Authenticated Access**: Downloading, creating, and restoring backups requires authenticated session authorization scoped to the user.
+- **Instance Owner Authorization**: Backups contain the entire system state, database dump, and all users' private files. Access to all backup operations (`backups.index`, `backups.store`, `backups.download`, `backups.destroy`, `backups.restore`, and scheduled backup preferences) is strictly limited to the **Instance Owner** via the `manage-system-backups` Gate. Non-owner users receive a `403 Forbidden` response.
 - **Secret Exclusion**: Backups strictly exclude `.env`, `APP_KEY`, database credentials, `storage/logs/`, `storage/framework/`, sessions, and compiled views.
 - **Zip Slip & Path Traversal Prevention**: Archive extraction validates every entry against `..`, leading slashes, Windows drive letters (`C:`), and sensitive target filenames before extraction.
 - **Integrity Checksums**: Manifest files include SHA-256 checksums of payload files (`database/kasme.sql` and attachments). Mismatched or tampered archives are rejected prior to restoration.
@@ -320,7 +320,26 @@ Strict security standards enforced:
 
 ---
 
-## 22. Security Incident Principle
+## 22. Instance Owner & Registration Security
+
+### 22.1 Single Instance Owner Model
+KasMe implements a lightweight, non-hierarchical ownership model:
+- The `users.is_instance_owner` boolean identifies the administrative authority of the self-hosted instance.
+- There is strictly **at most one** Instance Owner.
+- `is_instance_owner` is protected from mass-assignment (excluded from `#[Fillable]`). Privilege escalation via registration or profile update forms is prevented.
+- For fresh installations, the first successfully registered user is atomically designated as the Instance Owner using database locking (`lockForUpdate()`).
+- In existing databases with multiple users, operators can safely assign or transfer ownership using `php artisan kasme:set-owner --email=user@example.com`.
+
+### 22.2 Public Registration Control (`ALLOW_REGISTRATION`)
+KasMe is designed as a personal finance manager. Open registration is restricted:
+- Controlled via `config('kasme.allow_registration')` sourced from the `ALLOW_REGISTRATION` environment variable (default: `false`).
+- **Initial Setup**: When 0 users exist in the database, registration is open so the owner can create the root account.
+- **Subsequent Registrations**: Once the first user exists, `/register` (both `GET` and `POST`) is disabled and returns `403 Forbidden` unless `ALLOW_REGISTRATION=true`.
+- **Secondary Users**: Even when registration is explicitly allowed, newly registered users always receive `is_instance_owner = false` and cannot access system-level backups or administrative tools.
+
+---
+
+## 23. Security Incident Principle
 
 If data integrity is uncertain:
 
@@ -330,3 +349,4 @@ If data integrity is uncertain:
 - Do not silently continue.
 
 Financial consistency is more important than completing a request partially.
+

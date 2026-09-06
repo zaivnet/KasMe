@@ -111,4 +111,19 @@ class BudgetTest extends TestCase
             ->assertViewHas('budgetAmount', '1000.00')->assertViewHas('budgetUsed', '250.00')
             ->assertViewHas('budgetPercentage', 25.0)->assertSee('Anggaran bulanan');
     }
+
+    public function test_zero_amount_budget_utilization_returns_zero_without_exception(): void
+    {
+        $user = $this->user();
+        $category = $this->category($user);
+        $budget = $user->budgets()->make([
+            'category_id' => $category->id,
+            'amount' => '0.00',
+            'month' => 8,
+            'year' => 2026,
+        ]);
+        $budget->used_amount = '50.00';
+
+        $this->assertSame(0.0, $budget->utilizationPercentage());
+    }
 }

@@ -45,9 +45,20 @@ class SavingGoal extends Model
             ->minus((string) ($this->withdrawals_sum ?? 0))->toScale(2);
     }
 
+    public function loadProgress(): self
+    {
+        return $this->loadSum(['transactions as contributions_sum' => fn ($query) => $query->where('type', 'contribution')], 'amount')
+            ->loadSum(['transactions as withdrawals_sum' => fn ($query) => $query->where('type', 'withdrawal')], 'amount');
+    }
+
     public function progressPercentage(): float
     {
-        return BigDecimal::of($this->progressAmount())->dividedBy((string) $this->target_amount, 6, RoundingMode::HalfUp)
+        $target = BigDecimal::of((string) $this->target_amount);
+        if ($target->isZero()) {
+            return 0.0;
+        }
+
+        return BigDecimal::of($this->progressAmount())->dividedBy($target, 6, RoundingMode::HalfUp)
             ->multipliedBy(100)->toFloat();
     }
 
@@ -57,7 +68,12 @@ class SavingGoal extends Model
             return 'cancelled';
         }
 
-        return BigDecimal::of($this->progressAmount())->isGreaterThanOrEqualTo((string) $this->target_amount)
+        $target = BigDecimal::of((string) $this->target_amount);
+        if ($target->isZero()) {
+            return 'completed';
+        }
+
+        return BigDecimal::of($this->progressAmount())->isGreaterThanOrEqualTo($target)
             ? 'completed' : 'active';
     }
 
