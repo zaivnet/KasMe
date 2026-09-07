@@ -9,17 +9,21 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
-use ZipArchive;
 
 class RestoreService
 {
     public const SUPPORTED_VERSION = 1;
     public const REQUIRED_APP_NAME = 'KasMe';
 
+    protected ArchiveManager $archiveManager;
+
     public function __construct(
         protected BackupService $backupService,
-        protected DatabaseRestorer $databaseRestorer
-    ) {}
+        protected DatabaseRestorer $databaseRestorer,
+        ?ArchiveManager $archiveManager = null
+    ) {
+        $this->archiveManager = $archiveManager ?? app(ArchiveManager::class);
+    }
 
     /**
      * Validate an archive and return its preview diagnostics.
@@ -60,9 +64,8 @@ class RestoreService
             ];
         }
 
-        $zip = new ZipArchive();
-        $openResult = $zip->open($zipPath);
-        if ($openResult !== true) {
+        $entries = $this->archiveManager->listEntries($zipPath);
+        if (empty($entries)) {
             return [
                 'is_valid' => false,
                 'errors' => ['Arsip backup rusak atau bukan berkas ZIP yang valid.'],
@@ -77,62 +80,63 @@ class RestoreService
             ];
         }
 
-        try {
-            // Check for Zip Slip or prohibited entries
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $entryName = $zip->getNameIndex($i);
+        // Check for Zip Slip or prohibited entries
+        foreach ($entries as $entryName) {
+            if ($this->isUnsafeEntryName($entryName)) {
+                $errors[] = 'Arsip mengandung path tidak aman (potensi Zip Slip atau penimpaan sistem): ' . $entryName;
+                break;
+            }
+        }
 
-                if ($this->isUnsafeEntryName($entryName)) {
-                    $errors[] = 'Arsip mengandung path tidak aman (potensi Zip Slip atau penimpaan sistem): ' . $entryName;
+        // Check manifest
+        $manifestRaw = $this->archiveManager->readEntry($zipPath, 'manifest.json');
+        if ($manifestRaw === null) {
+            $errors[] = 'Arsip tidak memiliki berkas manifest.json.';
+        } else {
+            $manifest = json_decode($manifestRaw, true);
+            if (! is_array($manifest)) {
+                $errors[] = 'Format manifest.json tidak valid (bukan JSON yang dapat dibaca).';
+            } else {
+                if (($manifest['application'] ?? '') !== self::REQUIRED_APP_NAME) {
+                    $errors[] = 'Aplikasi asal backup bukan ' . self::REQUIRED_APP_NAME . ' (terdeteksi: ' . ($manifest['application'] ?? 'kosong') . ').';
+                }
+
+                if (($manifest['backup_format_version'] ?? 0) > self::SUPPORTED_VERSION) {
+                    $errors[] = 'Versi format backup (' . ($manifest['backup_format_version'] ?? '?') . ') tidak didukung oleh versi aplikasi ini.';
+                }
+            }
+        }
+
+        // Check database dump
+        $hasDb = false;
+        foreach ($entries as $entry) {
+            if (str_replace('\\', '/', $entry) === 'database/kasme.sql') {
+                $hasDb = true;
+                break;
+            }
+        }
+
+        if (! $hasDb) {
+            $errors[] = 'Arsip tidak memiliki berkas database/kasme.sql.';
+        }
+
+        // Verify checksums if available in manifest
+        if ($manifest && ! empty($manifest['files_checksum']) && is_array($manifest['files_checksum'])) {
+            foreach ($manifest['files_checksum'] as $filePath => $expectedHash) {
+                $fileContent = $this->archiveManager->readEntry($zipPath, $filePath);
+                if ($fileContent === null) {
+                    $errors[] = "Berkas terdaftar {$filePath} tidak ditemukan dalam arsip.";
+                    $checksumValid = false;
+                    break;
+                }
+
+                $actualHash = hash('sha256', $fileContent);
+                if (! hash_equals($expectedHash, $actualHash)) {
+                    $errors[] = "Integritas checksum tidak cocok untuk berkas {$filePath}.";
+                    $checksumValid = false;
                     break;
                 }
             }
-
-            // Check manifest
-            $manifestRaw = $zip->getFromName('manifest.json');
-            if ($manifestRaw === false) {
-                $errors[] = 'Arsip tidak memiliki berkas manifest.json.';
-            } else {
-                $manifest = json_decode($manifestRaw, true);
-                if (! is_array($manifest)) {
-                    $errors[] = 'Format manifest.json tidak valid (bukan JSON yang dapat dibaca).';
-                } else {
-                    if (($manifest['application'] ?? '') !== self::REQUIRED_APP_NAME) {
-                        $errors[] = 'Aplikasi asal backup bukan ' . self::REQUIRED_APP_NAME . ' (terdeteksi: ' . ($manifest['application'] ?? 'kosong') . ').';
-                    }
-
-                    if (($manifest['backup_format_version'] ?? 0) > self::SUPPORTED_VERSION) {
-                        $errors[] = 'Versi format backup (' . ($manifest['backup_format_version'] ?? '?') . ') tidak didukung oleh versi aplikasi ini.';
-                    }
-                }
-            }
-
-            // Check database dump
-            $dbContent = $zip->getFromName('database/kasme.sql');
-            if ($dbContent === false) {
-                $errors[] = 'Arsip tidak memiliki berkas database/kasme.sql.';
-            }
-
-            // Verify checksums if available in manifest
-            if ($manifest && ! empty($manifest['files_checksum']) && is_array($manifest['files_checksum'])) {
-                foreach ($manifest['files_checksum'] as $filePath => $expectedHash) {
-                    $fileContent = $zip->getFromName($filePath);
-                    if ($fileContent === false) {
-                        $errors[] = "Berkas terdaftar {$filePath} tidak ditemukan dalam arsip.";
-                        $checksumValid = false;
-                        break;
-                    }
-
-                    $actualHash = hash('sha256', $fileContent);
-                    if (! hash_equals($expectedHash, $actualHash)) {
-                        $errors[] = "Integritas checksum tidak cocok untuk berkas {$filePath}.";
-                        $checksumValid = false;
-                        break;
-                    }
-                }
-            }
-        } finally {
-            $zip->close();
         }
 
         return [
@@ -154,29 +158,7 @@ class RestoreService
      */
     public function isUnsafeEntryName(string $name): bool
     {
-        // Path traversal check
-        if (str_contains($name, '..') ||
-            str_starts_with($name, '/') ||
-            str_starts_with($name, '\\') ||
-            preg_match('/^[a-zA-Z]:/', $name)) {
-            return true;
-        }
-
-        // Sensitive filename checks
-        $basename = basename(str_replace('\\', '/', $name));
-        if ($basename === '.env' || str_starts_with($basename, '.env.') || $basename === 'APP_KEY') {
-            return true;
-        }
-
-        // Must strictly reside inside known top-level directories: manifest.json, database/, storage/private/
-        $normalized = str_replace('\\', '/', $name);
-        if ($normalized !== 'manifest.json' &&
-            ! str_starts_with($normalized, 'database/') &&
-            ! str_starts_with($normalized, 'storage/private/')) {
-            return true;
-        }
-
-        return false;
+        return $this->archiveManager->isUnsafeEntryName($name);
     }
 
     /**
@@ -211,7 +193,7 @@ class RestoreService
                 throw new RuntimeException('Gagal membuat backup otomatis sebelum restore (proses restore dibatalkan demi keamanan data): ' . $e->getMessage(), 0, $e);
             }
 
-            // 4. Extract archive securely to staging directory
+            // 4. Extract archive securely to staging directory via ArchiveManager
             $this->extractSafely($zipPath, $tempStaging);
 
             // 5. Restore database
@@ -264,44 +246,7 @@ class RestoreService
      */
     protected function extractSafely(string $zipPath, string $destination): void
     {
-        $zip = new ZipArchive();
-        if ($zip->open($zipPath) !== true) {
-            throw new RuntimeException('Gagal membuka arsip ZIP saat proses ekstraksi.');
-        }
-
-        $realDestination = realpath($destination);
-        if ($realDestination === false) {
-            $realDestination = $destination;
-        }
-
-        try {
-            for ($i = 0; $i < $zip->numFiles; $i++) {
-                $entryName = $zip->getNameIndex($i);
-
-                if ($this->isUnsafeEntryName($entryName)) {
-                    throw new RuntimeException('Terdeteksi path tidak aman dalam arsip ZIP: ' . $entryName);
-                }
-
-                $targetPath = $destination . DIRECTORY_SEPARATOR . str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $entryName);
-
-                // If entry is directory
-                if (str_ends_with($entryName, '/') || str_ends_with($entryName, '\\')) {
-                    File::ensureDirectoryExists($targetPath);
-                    continue;
-                }
-
-                File::ensureDirectoryExists(dirname($targetPath));
-
-                $content = $zip->getFromIndex($i);
-                if ($content === false) {
-                    throw new RuntimeException('Gagal mengekstrak berkas: ' . $entryName);
-                }
-
-                File::put($targetPath, $content);
-            }
-        } finally {
-            $zip->close();
-        }
+        $this->archiveManager->extractArchive($zipPath, $destination);
     }
 
     /**

@@ -9,7 +9,6 @@ use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 use RuntimeException;
 use Throwable;
-use ZipArchive;
 
 class BackupService
 {
@@ -17,9 +16,14 @@ class BackupService
     public const FORMAT_VERSION = 1;
     public const APPLICATION_NAME = 'KasMe';
 
+    protected ArchiveManager $archiveManager;
+
     public function __construct(
-        protected DatabaseDumper $databaseDumper
-    ) {}
+        protected DatabaseDumper $databaseDumper,
+        ?ArchiveManager $archiveManager = null
+    ) {
+        $this->archiveManager = $archiveManager ?? app(ArchiveManager::class);
+    }
 
     /**
      * Get the absolute path to the backup storage directory.
@@ -33,6 +37,22 @@ class BackupService
     }
 
     /**
+     * Get the currently active archive engine ('ziparchive', 'cli_zip', or 'unavailable').
+     */
+    public function getArchiveEngine(): string
+    {
+        return $this->archiveManager->archiveEngine();
+    }
+
+    /**
+     * Get the underlying ArchiveManager instance.
+     */
+    public function getArchiveManager(): ArchiveManager
+    {
+        return $this->archiveManager;
+    }
+
+    /**
      * Create a full backup archive.
      *
      * @param  'manual'|'scheduled'|'pre_restore'  $type
@@ -42,6 +62,11 @@ class BackupService
      */
     public function createBackup(string $type = 'manual', ?User $user = null): string
     {
+        $archiveEngine = $this->archiveManager->archiveEngine();
+        if ($archiveEngine === 'unavailable') {
+            throw new RuntimeException('Server tidak memiliki ZipArchive maupun binary zip/unzip yang dapat digunakan.');
+        }
+
         $backupDir = $this->getBackupDirectory();
         $timestamp = now()->format('Y-m-d-His');
         $randomSuffix = bin2hex(random_bytes(3));
@@ -52,8 +77,10 @@ class BackupService
         File::ensureDirectoryExists($tempDir);
 
         try {
-            // 1. Dump database
-            $dbDumpPath = $tempDir . DIRECTORY_SEPARATOR . 'kasme.sql';
+            // 1. Dump database directly into staging subfolder database/kasme.sql
+            $dbDumpDir = $tempDir . DIRECTORY_SEPARATOR . 'database';
+            File::ensureDirectoryExists($dbDumpDir);
+            $dbDumpPath = $dbDumpDir . DIRECTORY_SEPARATOR . 'kasme.sql';
             $dumpResult = $this->databaseDumper->dump($dbDumpPath);
 
             // 2. Prepare payload files and calculate checksums
@@ -61,20 +88,24 @@ class BackupService
                 'database/kasme.sql' => $dumpResult['checksum'],
             ];
 
-            // 3. Scan private files (e.g., attachments), strictly excluding backups and temp
+            // 3. Scan private files and copy into staging storage/private/
             $privateStoragePath = storage_path('app/private');
             $privateFiles = $this->collectPrivateFiles($privateStoragePath);
 
             foreach ($privateFiles as $relativePath => $fullPath) {
                 $filesChecksum['storage/private/' . $relativePath] = hash_file('sha256', $fullPath);
+                $destPath = $tempDir . DIRECTORY_SEPARATOR . 'storage' . DIRECTORY_SEPARATOR . 'private' . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $relativePath);
+                File::ensureDirectoryExists(dirname($destPath));
+                File::copy($fullPath, $destPath);
             }
 
-            // 4. Generate manifest.json
+            // 4. Generate manifest.json inside staging directory
             $manifest = [
                 'application' => self::APPLICATION_NAME,
                 'backup_format_version' => self::FORMAT_VERSION,
                 'created_at' => now()->toIso8601String(),
                 'type' => $type,
+                'archive_engine' => $archiveEngine,
                 'database_engine' => $dumpResult['engine'],
                 'database_dump_method' => $dumpResult['method'],
                 'includes_database' => true,
@@ -92,21 +123,8 @@ class BackupService
             $manifestPath = $tempDir . DIRECTORY_SEPARATOR . 'manifest.json';
             File::put($manifestPath, json_encode($manifest, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES));
 
-            // 5. Build ZIP archive
-            $zip = new ZipArchive();
-            $res = $zip->open($archivePath, ZipArchive::CREATE | ZipArchive::OVERWRITE);
-            if ($res !== true) {
-                throw new RuntimeException("Failed to create ZIP archive: code {$res}");
-            }
-
-            $zip->addFile($manifestPath, 'manifest.json');
-            $zip->addFile($dbDumpPath, 'database/kasme.sql');
-
-            foreach ($privateFiles as $relativePath => $fullPath) {
-                $zip->addFile($fullPath, 'storage/private/' . $relativePath);
-            }
-
-            $zip->close();
+            // 5. Build ZIP archive via ArchiveManager (ZipArchive or CLI zip)
+            $this->archiveManager->createArchive($tempDir, $archivePath);
 
             // Verify created archive
             if (! file_exists($archivePath) || filesize($archivePath) === 0) {
@@ -232,7 +250,7 @@ class BackupService
     }
 
     /**
-     * Read manifest.json directly from a ZIP archive.
+     * Read manifest.json directly from a ZIP archive via ArchiveManager.
      */
     public function readManifestFromZip(string $zipPath): ?array
     {
@@ -240,21 +258,14 @@ class BackupService
             return null;
         }
 
-        $zip = new ZipArchive();
-        if ($zip->open($zipPath) !== true) {
+        $content = $this->archiveManager->readEntry($zipPath, 'manifest.json');
+        if ($content === null) {
             return null;
         }
 
-        try {
-            $content = $zip->getFromName('manifest.json');
-            if ($content === false) {
-                return null;
-            }
+        $decoded = json_decode($content, true);
 
-            return json_decode($content, true);
-        } finally {
-            $zip->close();
-        }
+        return is_array($decoded) ? $decoded : null;
     }
 
     /**

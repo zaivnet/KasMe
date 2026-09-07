@@ -371,3 +371,29 @@ When migrating an existing database to Sprint 19.1+:
    (or execute `php artisan kasme:set-owner` without arguments for interactive selection).
 3. Verify that `ALLOW_REGISTRATION=false` is present in `.env`.
 
+---
+
+## 15. Backup Archive Engine & Shared Hosting Fallback (Sprint 19.2)
+
+### Architecture & Priority
+KasMe uses an internal `ArchiveManager` abstraction that detects the available ZIP engine with the following priority:
+1. **`ziparchive`**: Uses PHP's native `ZipArchive` extension when loaded in runtime.
+2. **`cli_zip`**: Automatic fallback to system `zip` and `unzip` command-line binaries when `proc_open` or `exec` is permitted.
+3. **`unavailable`**: If neither is accessible, operations fail safely with the explicit error:
+   `"Server tidak memiliki ZipArchive maupun binary zip/unzip yang dapat digunakan."`
+
+### Shared Hosting Compatibility (cPanel / CloudLinux / alt-php84)
+On conventional shared hosting servers (such as `kas.selon.my.id`), the PHP CLI may support `zip` or CLI binaries, while the Apache/LiteSpeed web runtime lacks the `zip.so` extension.
+- **No Host-Wide Configuration Changes Required**: KasMe will automatically fall back to CLI packaging without modifying global hosting configurations or disrupting neighboring accounts/domains.
+- **Standard PKZIP Format**: Backups produced via CLI fallback are standard ZIP archives with relative paths (`manifest.json`, `database/kasme.sql`, `storage/private/...`), completely readable across Windows, Linux, macOS, and KasMe's restore subsystem.
+- **Security & Integrity**:
+  - Shell arguments are strictly escaped using `escapeshellarg()`.
+  - The staging directory is strictly scoped and isolated.
+  - Prior to any extraction, all entries are audited (`unzip -Z -1`) to prevent Zip Slip (`../`, absolute paths, forbidden files).
+  - Extracted symlinks are automatically detected and purged.
+
+### Troubleshooting
+- **Error: `Server tidak memiliki ZipArchive maupun binary zip/unzip yang dapat digunakan`**:
+  1. In cPanel, navigate to **Select PHP Version** &rarr; **Extensions** and check the `zip` box.
+  2. Ensure `proc_open` and `exec` are not listed in `disable_functions` under PHP Options.
+  3. Check that `/usr/bin/zip` and `/usr/bin/unzip` are executable in your cPanel user shell.

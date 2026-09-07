@@ -8,8 +8,11 @@ The format is inspired by Keep a Changelog principles.
 
 ## [Unreleased]
 
-### Added
-
+- `ArchiveManager` abstraction supporting multi-engine ZIP packaging and decompression with automatic priority (`ziparchive` -> `cli_zip` -> `unavailable`).
+- Automatic CLI `zip` and `unzip` fallback for shared hosting environments (e.g. cPanel / CloudLinux alt-php84 on `kas.selon.my.id`) where PHP's `ZipArchive` extension is missing in the web runtime.
+- Pre-extraction entry audit via `unzip -Z -1` preventing Zip Slip, path traversal, and sensitive file overwrite before decompression commands execute.
+- Post-extraction symlink abuse detection and automatic purge protection.
+- Backward-compatible optional `archive_engine` metadata field in backup `manifest.json`.
 - Single Instance Owner security model (`users.is_instance_owner`) with atomic first-user bootstrap and CLI owner assignment command (`php artisan kasme:set-owner`).
 - Centralized `manage-system-backups` authorization Gate protecting all backup and restore operations from non-owner users.
 - Public registration toggle (`ALLOW_REGISTRATION`) via `config/kasme.php`, automatically restricting registrations once the instance owner exists.
