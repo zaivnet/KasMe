@@ -269,11 +269,24 @@ Verify that all cache commands output success.
 ## 10. Cron & Queues
 
 - **Scheduler / Cron**:
-  If scheduled automated backups are enabled in **Pengaturan &rarr; Backup & Restore**, configure a standard cPanel Cron Job to run every minute:
+  If scheduled automated backups are enabled in **Pengaturan &rarr; Backup & Restore**, configure a standard cPanel Cron Job to run every minute.
+  
+  KasMe includes a runtime **Cron Command Generator** that inspects your installation path and configuration to display the exact, ready-to-use cron command in the **Panduan cPanel Cron Job** card.
+
+  Example format:
   ```cron
-  * * * * * /usr/local/bin/php /home/USERNAME/apps/kasme/artisan schedule:run >> /dev/null 2>&1
+  * * * * * cd '/home/USERNAME/apps/kasme' && '/opt/alt/php84/usr/bin/php' -d extension=bcmath.so -d extension=dom.so -d extension=fileinfo.so -d extension=mbstring.so -d extension=zip.so artisan schedule:run >> /dev/null 2>&1
   ```
-  *(Replace `/usr/local/bin/php` with the actual path to PHP 8.3/8.4 and `/home/USERNAME/apps/kasme` with your installation directory on the server).*
+
+  **Configuration Options in `.env`**:
+  ```env
+  # Optional: Specific PHP CLI Binary on Shared Hosting (defaults to current PHP_BINARY)
+  KASME_PHP_CLI_BINARY=/opt/alt/php84/usr/bin/php
+
+  # Optional: Comma-separated extension list for shared hosting environments
+  KASME_PHP_CLI_EXTENSIONS=bcmath,dom,fileinfo,mbstring,zip
+  ```
+
   The scheduler handles frequency (Daily, Weekly, Monthly), execution time, and idempotency automatically.
 
 - **Queues**: Synchronous execution is used (`QUEUE_CONNECTION=sync`). A background queue worker daemon is **NOT REQUIRED**.

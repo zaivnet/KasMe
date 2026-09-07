@@ -149,12 +149,24 @@
                 </div>
             </div>
 
-            <div class="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4 text-xs leading-relaxed text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300">
-                <p class="font-bold text-slate-800 dark:text-slate-200">Panduan cPanel Cron Job:</p>
-                <p class="mt-1">Pencadangan terjadwal dijalankan melalui scheduler Laravel. Pada hosting cPanel, pastikan cron job berikut telah aktif:</p>
-                <code class="mt-1.5 block overflow-x-auto rounded-lg bg-slate-950 p-2 text-emerald-400 font-mono text-xs">
-                    * * * * * cd /home/USERNAME/apps/kasme && php artisan schedule:run >> /dev/null 2>&1
-                </code>
+            <div class="rounded-2xl border border-slate-200/90 bg-slate-50/60 p-4 text-xs leading-relaxed text-slate-600 dark:border-slate-800 dark:bg-slate-900/60 dark:text-slate-300" x-data="{ copied: false }">
+                <div class="flex items-center justify-between gap-2">
+                    <p class="font-bold text-slate-800 dark:text-slate-200">Panduan cPanel Cron Job:</p>
+                    <button type="button"
+                            @click="navigator.clipboard.writeText('{{ addslashes($cronCommand) }}'); copied = true; setTimeout(() => copied = false, 2000)"
+                            class="inline-flex items-center gap-1.5 rounded-lg border border-slate-300 bg-white px-2.5 py-1 text-[11px] font-semibold text-slate-700 shadow-xs hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700 transition">
+                        <span x-show="!copied" class="flex items-center gap-1">
+                            <x-icon name="copy" size="3.5" />
+                            <span>Salin</span>
+                        </span>
+                        <span x-show="copied" class="flex items-center gap-1 text-emerald-600 dark:text-emerald-400" style="display: none;">
+                            <x-icon name="check" size="3.5" />
+                            <span>Tersalin!</span>
+                        </span>
+                    </button>
+                </div>
+                <p class="mt-1">Tambahkan perintah berikut pada cPanel → Cron Jobs dan jalankan setiap menit.</p>
+                <code class="mt-2 block overflow-x-auto rounded-lg bg-slate-950 p-2.5 text-emerald-400 font-mono text-xs select-all">{{ $cronCommand }}</code>
             </div>
 
             <div class="pt-2">

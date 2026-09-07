@@ -8,6 +8,10 @@ The format is inspired by Keep a Changelog principles.
 
 ## [Unreleased]
 
+- Dynamic `CronCommandGenerator` producing portable, runtime-detected cPanel cron job commands without hardcoding server paths or usernames.
+- Configurable PHP CLI binary (`KASME_PHP_CLI_BINARY`) and optional CLI extension flags (`KASME_PHP_CLI_EXTENSIONS`) in `config/kasme.php` and `.env.example`.
+- Strict alphanumeric and dash/underscore validation for CLI extension flags preventing shell injection.
+- Interactive copy button and clear cPanel setup instructions on the Backup & Restore settings dashboard.
 - `ArchiveManager` abstraction supporting multi-engine ZIP packaging and decompression with automatic priority (`ziparchive` -> `cli_zip` -> `unavailable`).
 - Automatic CLI `zip` and `unzip` fallback for shared hosting environments (e.g. cPanel / CloudLinux alt-php84 on `kas.selon.my.id`) where PHP's `ZipArchive` extension is missing in the web runtime.
 - Pre-extraction entry audit via `unzip -Z -1` preventing Zip Slip, path traversal, and sensitive file overwrite before decompression commands execute.

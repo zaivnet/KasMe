@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Setting;
 use App\Services\Backup\BackupService;
+use App\Services\Backup\CronCommandGenerator;
 use App\Services\Backup\RestoreService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -18,7 +19,8 @@ class BackupController extends Controller
 {
     public function __construct(
         protected BackupService $backupService,
-        protected RestoreService $restoreService
+        protected RestoreService $restoreService,
+        protected CronCommandGenerator $cronCommandGenerator
     ) {}
 
     /**
@@ -34,6 +36,7 @@ class BackupController extends Controller
         $backups = $this->backupService->listBackups();
         $storageBytes = $this->backupService->getStorageUsage();
         $formattedUsage = $this->backupService->formatBytes($storageBytes);
+        $cronCommand = $this->cronCommandGenerator->generate();
 
         return view('settings.backups.index', [
             'backups' => $backups,
@@ -42,6 +45,7 @@ class BackupController extends Controller
             'setting' => $setting,
             'frequencies' => Setting::BACKUP_FREQUENCIES,
             'retentions' => Setting::BACKUP_RETENTIONS,
+            'cronCommand' => $cronCommand,
         ]);
     }
 
