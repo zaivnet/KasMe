@@ -20,6 +20,7 @@ use App\Http\Controllers\SettingController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\TransactionExportController;
 use App\Http\Controllers\TransferController;
+use App\Http\Controllers\UserController;
 use App\Http\Middleware\ApplyUserSettings;
 use Illuminate\Support\Facades\Route;
 
@@ -73,6 +74,15 @@ Route::middleware(['auth', ApplyUserSettings::class])->group(function (): void {
         Route::delete('/settings/backups/{filename}', [\App\Http\Controllers\BackupController::class, 'destroy'])->name('backups.destroy');
         Route::get('/settings/backups/{filename}/restore', [\App\Http\Controllers\BackupController::class, 'restorePreview'])->name('backups.restorePreview');
         Route::post('/settings/backups/{filename}/restore', [\App\Http\Controllers\BackupController::class, 'restore'])->name('backups.restore');
+    });
+    Route::middleware('can:manage-users')->group(function (): void {
+        Route::get('/settings/users', [UserController::class, 'index'])->name('settings.users.index');
+        Route::get('/settings/users/create', [UserController::class, 'create'])->name('settings.users.create');
+        Route::post('/settings/users', [UserController::class, 'store'])->name('settings.users.store');
+        Route::get('/settings/users/{user}/edit', [UserController::class, 'edit'])->name('settings.users.edit');
+        Route::put('/settings/users/{user}', [UserController::class, 'update'])->name('settings.users.update');
+        Route::post('/settings/users/{user}/reset-password', [UserController::class, 'resetPassword'])->name('settings.users.reset-password');
+        Route::delete('/settings/users/{user}', [UserController::class, 'destroy'])->name('settings.users.destroy');
     });
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
 });

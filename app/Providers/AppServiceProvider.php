@@ -27,5 +27,9 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('manage-system-backups', function (User $user): bool {
             return (bool) $user->is_instance_owner;
         });
+
+        Gate::define('manage-users', function (User $user): bool {
+            return (bool) $user->is_instance_owner;
+        });
     }
 }

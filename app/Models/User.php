@@ -19,6 +19,15 @@ class User extends Authenticatable
     /** @use HasFactory<UserFactory> */
     use HasFactory, Notifiable;
 
+    /**
+     * The model's default values for attributes.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'is_active' => true,
+    ];
+
     public function accounts(): HasMany
     {
         return $this->hasMany(Account::class);
@@ -75,6 +84,19 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_instance_owner' => 'boolean',
+            'is_active' => 'boolean',
         ];
+    }
+
+    public function hasFinancialData(): bool
+    {
+        return $this->accounts()->exists()
+            || $this->categories()->exists()
+            || $this->transactions()->exists()
+            || $this->transfers()->exists()
+            || $this->budgets()->exists()
+            || $this->bills()->exists()
+            || $this->debts()->exists()
+            || $this->savingGoals()->exists();
     }
 }

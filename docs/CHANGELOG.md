@@ -8,6 +8,15 @@ The format is inspired by Keep a Changelog principles.
 
 ## [Unreleased]
 
+- Instance Owner User Management module (`/settings/users`) allowing secure sub-user creation, status management, and password resets without opening public registration (`ALLOW_REGISTRATION=false`).
+- Gate `manage-users` restricting user management routes to the Instance Owner (`is_instance_owner = true`).
+- Added `is_active` boolean column to `users` table with default `true`.
+- Deactivation-first safe delete strategy protecting historical financial data integrity: users with existing financial records cannot be hard-deleted, but are deactivated (`is_active = false`).
+- Hard deletion strictly allowed only for users with zero financial records.
+- Instant session termination and eviction in `ApplyUserSettings` middleware and `AuthenticatedSessionController` for deactivated accounts.
+- Instance Owner account protection preventing deactivation, deletion, self-deletion, and privilege escalation via mass assignment.
+- Administrative password reset functionality for Instance Owner.
+- Strict data isolation maintained across all users.
 - Dynamic `CronCommandGenerator` producing portable, runtime-detected cPanel cron job commands without hardcoding server paths or usernames.
 - Configurable PHP CLI binary (`KASME_PHP_CLI_BINARY`) and optional CLI extension flags (`KASME_PHP_CLI_EXTENSIONS`) in `config/kasme.php` and `.env.example`.
 - Strict alphanumeric and dash/underscore validation for CLI extension flags preventing shell injection.

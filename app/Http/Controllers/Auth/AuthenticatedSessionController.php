@@ -28,6 +28,16 @@ class AuthenticatedSessionController extends Controller
             ])->onlyInput('email');
         }
 
+        if (Auth::user()->is_active === false) {
+            Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors([
+                'email' => 'Akun Anda sedang dinonaktifkan. Silakan hubungi administrator.',
+            ])->onlyInput('email');
+        }
+
         $request->session()->regenerate();
 
         return redirect()->intended(route('app.home'));

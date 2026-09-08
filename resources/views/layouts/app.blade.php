@@ -124,6 +124,12 @@
                                 <span class="grid size-7 place-items-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300"><x-icon name="settings" size="4" /></span>
                                 <span>Pengaturan</span>
                             </a>
+                            @can('manage-users')
+                            <a href="{{ route('settings.users.index') }}" @click="userMenu = false" class="flex min-h-10 items-center gap-3 rounded-xl px-3 py-2 text-sm font-medium text-slate-700 transition hover:bg-teal-50/60 hover:text-teal-900 dark:text-slate-200 dark:hover:bg-slate-800" role="menuitem">
+                                <span class="grid size-7 place-items-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-950/60 dark:text-blue-400"><x-icon name="users" size="4" /></span>
+                                <span>Kelola Pengguna</span>
+                            </a>
+                            @endcan
                         </div>
                         <form method="POST" action="{{ route('logout') }}" class="border-t border-slate-100 p-1.5 dark:border-slate-800">
                             @csrf

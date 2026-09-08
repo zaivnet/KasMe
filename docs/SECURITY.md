@@ -339,6 +339,15 @@ KasMe is designed as a personal finance manager. Open registration is restricted
 - **Subsequent Registrations**: Once the first user exists, `/register` (both `GET` and `POST`) is disabled and returns `403 Forbidden` unless `ALLOW_REGISTRATION=true`.
 - **Secondary Users**: Even when registration is explicitly allowed, newly registered users always receive `is_instance_owner = false` and cannot access system-level backups or administrative tools.
 
+### 22.3 Instance Owner User Management & Safe Deactivation
+To allow administrators to grant access to trusted users without opening public registration (`ALLOW_REGISTRATION=false`), KasMe provides an administrative User Management module (`/settings/users`):
+- **Access Control**: Exclusively accessible by the Instance Owner via the `manage-users` Gate. All actions (list, create, edit, update, reset password, destroy) return `403 Forbidden` for non-owners.
+- **Controlled Account Creation**: Instance Owner creates accounts directly with validated credentials and initial passwords. Newly created accounts are strictly assigned `is_instance_owner = false`.
+- **Account Deactivation**: The `is_active` boolean column governs login capability. Deactivated users cannot log in, and active sessions are terminated immediately via `ApplyUserSettings` middleware.
+- **Owner Account Protection**: The Instance Owner account cannot be deactivated, deleted, or transferred through user management.
+- **Deactivation-First Safe Deletion**: To preserve complete historical financial integrity, users who possess financial records (transactions, accounts, transfers, budgets, bills, debts, or saving goals) cannot be deleted from the database. Attempting deletion safely transitions their status to `is_active = false`. Permanent database deletion is strictly reserved for users with zero financial records.
+- **Strict Data Isolation**: Each user's financial domain remains completely isolated. Cross-user access or manipulation is blocked across all endpoints.
+
 ---
 
 ## 23. Security Incident Principle

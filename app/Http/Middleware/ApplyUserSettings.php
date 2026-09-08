@@ -11,7 +11,19 @@ class ApplyUserSettings
 {
     public function handle(Request $request, Closure $next): Response
     {
-        $preferences = $request->user()->setting()->firstOrCreate([], [
+        $user = $request->user();
+
+        if ($user && $user->is_active === false) {
+            \Illuminate\Support\Facades\Auth::guard('web')->logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')->withErrors([
+                'email' => 'Akun Anda sedang dinonaktifkan. Silakan hubungi administrator.',
+            ]);
+        }
+
+        $preferences = $user->setting()->firstOrCreate([], [
             'currency' => 'IDR',
             'date_format' => 'd M Y',
             'timezone' => 'Asia/Jakarta',

@@ -85,6 +85,23 @@
         </a>
     </section>
 
+    @can('manage-users')
+    <section class="section-card accent-blue mt-8">
+        <div class="section-heading">
+            <span class="icon-badge-blue"><x-icon name="users" size="5"/></span>
+            <div>
+                <p class="section-kicker text-blue-700 dark:text-blue-400">Administrasi</p>
+                <h2 class="mt-0.5 text-lg font-bold text-slate-900 dark:text-white">Manajemen Pengguna</h2>
+            </div>
+        </div>
+        <p class="mt-3 text-sm text-slate-500 dark:text-slate-400">Kelola akun pengguna, tambah pengguna baru secara manual tanpa registrasi publik, atur status aktif, dan reset kata sandi.</p>
+        <a href="{{ route('settings.users.index') }}" class="btn-secondary mt-4">
+            <x-icon name="users" size="4"/>
+            <span>Buka Manajemen Pengguna</span>
+        </a>
+    </section>
+    @endcan
+
     @can('manage-system-backups')
     <section class="section-card accent-emerald mt-8">
         <div class="section-heading">

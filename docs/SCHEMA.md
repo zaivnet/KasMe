@@ -39,6 +39,8 @@ Columns:
 | email | VARCHAR(255) | required, unique |
 | email_verified_at | TIMESTAMP | nullable |
 | password | VARCHAR(255) | required |
+| is_instance_owner | BOOLEAN | default false, instance administrator |
+| is_active | BOOLEAN | default true, account access control |
 | remember_token | VARCHAR(100) | nullable |
 | created_at | TIMESTAMP | Laravel default |
 | updated_at | TIMESTAMP | Laravel default |
