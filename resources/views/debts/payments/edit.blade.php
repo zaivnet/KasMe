@@ -8,7 +8,7 @@
     <form method="POST" action="{{ route('debts.payments.update', [$debt, $payment]) }}" class="section-card accent-emerald mt-6">
         @csrf @method('PUT')
         @include('debts.payments._form')
-        <button class="btn-primary mt-6">Simpan pembayaran</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Simpan pembayaran</button>
     </form>
     <section class="section-card accent-rose mt-6">
         <h2 class="font-bold text-slate-900 dark:text-white">Batalkan pembayaran</h2>

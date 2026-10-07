@@ -105,7 +105,7 @@ class TransactionController extends Controller
             'accounts' => $request->user()->accounts()->orderBy('name')->get(),
             'categories' => $request->user()->categories()
                 ->where(fn ($query) => $query->where('is_active', true)
-                    ->when($transaction?->category_id, fn ($query, $id) => $query->orWhereKey($id)))
+                    ->when($transaction?->category_id, fn ($query, $id) => $query->orWhere('id', $id)))
                 ->orderBy('type')->orderBy('name')->get(),
             'types' => Transaction::TYPES,
             'directions' => Transaction::ADJUSTMENT_DIRECTIONS,

@@ -6,7 +6,7 @@
     <h1 class="mt-4 text-3xl font-semibold tracking-tight">Edit akun</h1>
     <form method="POST" action="{{ route('accounts.update', $account) }}" class="section-card accent-cyan mt-6">@csrf @method('PUT')
         @include('accounts._form')
-        <button class="btn-primary mt-6">Simpan perubahan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Simpan perubahan</button>
     </form>
 </div>
 @endsection

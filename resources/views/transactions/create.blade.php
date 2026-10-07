@@ -12,7 +12,7 @@
         <form method="POST" action="{{ route('transactions.store') }}" enctype="multipart/form-data" class="section-card accent-violet mt-6">
             @csrf
             @include('transactions._form')
-            <button class="btn-primary mt-6">Buat transaksi</button>
+            <button class="btn-primary mt-6 w-full sm:w-auto">Buat transaksi</button>
         </form>
     @endif
 </div>

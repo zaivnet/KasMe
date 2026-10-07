@@ -29,7 +29,7 @@
                 <x-form-error name="email" />
             </div>
             <div class="pt-2">
-                <button class="btn-primary">Simpan profil</button>
+                <button class="btn-primary w-full sm:w-auto">Simpan profil</button>
             </div>
         </form>
     </section>
@@ -59,7 +59,7 @@
                 <input id="password_confirmation" name="password_confirmation" type="password" required autocomplete="new-password" class="form-control">
             </div>
             <div class="pt-2">
-                <button class="btn-primary">Perbarui kata sandi</button>
+                <button class="btn-primary w-full sm:w-auto">Perbarui kata sandi</button>
             </div>
         </form>
     </section>

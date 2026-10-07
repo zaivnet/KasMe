@@ -8,7 +8,7 @@
     <form method="POST" action="{{ route('budgets.store') }}" class="section-card accent-amber mt-6">
         @csrf
         @include('budgets._form')
-        <button @disabled($categories->isEmpty()) class="btn-primary mt-6 disabled:cursor-not-allowed disabled:opacity-50">Buat anggaran</button>
+        <button @disabled($categories->isEmpty()) class="btn-primary mt-6 w-full sm:w-auto disabled:cursor-not-allowed disabled:opacity-50">Buat anggaran</button>
     </form>
 </div>
 @endsection

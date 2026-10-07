@@ -8,7 +8,7 @@
         @csrf
         @method('PUT')
         @include('transactions._form')
-        <button class="btn-primary mt-6">Simpan perubahan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Simpan perubahan</button>
     </form>
 </div>
 @endsection

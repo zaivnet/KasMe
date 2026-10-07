@@ -7,7 +7,7 @@
     <form method="POST" action="{{ route('transfers.update', $transfer) }}" class="section-card accent-cyan mt-6">
         @csrf @method('PUT')
         @include('transfers._form')
-        <button class="btn-primary mt-6">Simpan perubahan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Simpan perubahan</button>
     </form>
 </div>
 @endsection

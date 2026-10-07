@@ -30,7 +30,7 @@ class SavingGoalTransactionController extends Controller
         return view('saving-goals.transactions.edit', [
             'goal' => $savingGoal,
             'transaction' => $transaction,
-            'accounts' => $request->user()->accounts()->where(fn ($query) => $query->where('is_active', true)->orWhereKey($transaction->account_id))->orderBy('name')->get(),
+            'accounts' => $request->user()->accounts()->where(fn ($query) => $query->where('is_active', true)->orWhere('id', $transaction->account_id))->orderBy('name')->get(),
         ]);
     }
 

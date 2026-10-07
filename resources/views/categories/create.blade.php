@@ -7,7 +7,7 @@
     <form method="POST" action="{{ route('categories.store') }}" class="section-card accent-emerald mt-6">
         @csrf
         @include('categories._form')
-        <button class="btn-primary mt-6">Buat kategori</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Buat kategori</button>
     </form>
 </div>
 @endsection

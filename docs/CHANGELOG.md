@@ -8,7 +8,12 @@ The format is inspired by Keep a Changelog principles.
 
 ## [Unreleased]
 
-- Instance Owner User Management module (`/settings/users`) allowing secure sub-user creation, status management, and password resets without opening public registration (`ALLOW_REGISTRATION=false`).
+- Mobile Form Action Bottom Clearance: Global `--mobile-nav-height` (4.5rem) CSS variable and `.mobile-safe` padding-bottom calculation (`calc(var(--mobile-nav-height, 4.5rem) + env(safe-area-inset-bottom, 0px) + 2rem)`) on `<main id="main-content">`, preventing fixed bottom navigation and FAB from covering submit buttons and form inputs across all mobile viewports (360x800, 390x844, 412x915).
+- Desktop Responsive Padding Reset: `.mobile-safe` automatically resets to standard `2rem` (32px) on desktop viewports (`lg:min-width: 1024px`), eliminating redundant whitespace.
+- FAB Route Visibility Rule: Mobile Floating Action Button (FAB) is strictly hidden on create and edit routes (`transactions.create`, `transactions.edit`, `*.create`, `*.edit`, `profile.edit`, `settings.edit`), preventing touch collision with submit buttons, file attachment pickers, and input fields.
+- Mobile Touch Target Hardening: Form action submit buttons updated to responsive full-width (`w-full sm:w-auto`, min-height >= 44px) across all modules (Transactions, Transfers, Accounts, Categories, Budgets, Bills, Debts, Saving Goals, Settings, Profile, User Management) while preserving double-submit protection.
+- Dark Mode Summary Card Contrast Fix: Resolved low-contrast and washed-out icon badges on dashboard stat cards by adding `dark:bg-none` (resetting light-mode pastel gradients), deep-tinted backgrounds (`dark:bg-*-950/60`), subtle borders (`dark:border-*-800/60`), and luminous high-contrast icon foregrounds (`dark:text-*-400`) across all semantic colors (Blue/Cyan for Balance, Emerald for Income, Rose for Expense, Violet for Net Flow).
+- Form Category & Account Option Query Normalization: Replaced unsupported `orWhereKey` calls with standard `orWhere('id', $id)` in `TransactionController`, `BillController`, `BudgetController`, `DebtPaymentController`, and `SavingGoalTransactionController`, ensuring active categories/accounts and existing inactive records load cleanly on edit routes without requiring global builder macros.
 - Gate `manage-users` restricting user management routes to the Instance Owner (`is_instance_owner = true`).
 - Added `is_active` boolean column to `users` table with default `true`.
 - Deactivation-first safe delete strategy protecting historical financial data integrity: users with existing financial records cannot be hard-deleted, but are deactivated (`is_active = false`).

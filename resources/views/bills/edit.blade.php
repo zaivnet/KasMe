@@ -7,7 +7,7 @@
     <form method="POST" action="{{ route('bills.update', $bill) }}" class="section-card accent-amber mt-6">
         @csrf @method('PUT')
         @include('bills._form')
-        <button class="btn-primary mt-6">Simpan perubahan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Simpan perubahan</button>
     </form>
     <section class="section-card accent-rose mt-6">
         <h2 class="font-bold text-slate-900 dark:text-white">Arsipkan tagihan</h2>

@@ -7,7 +7,7 @@
     <form method="POST" action="{{ route('saving-goals.transactions.update', [$goal, $transaction]) }}" class="section-card accent-violet mt-6">
         @csrf @method('PUT')
         @include('saving-goals.transactions._form')
-        <button class="btn-primary mt-6">Simpan pergerakan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Simpan pergerakan</button>
     </form>
     <section class="section-card accent-rose mt-6">
         <h2 class="font-bold text-slate-900 dark:text-white">Batalkan pergerakan</h2>

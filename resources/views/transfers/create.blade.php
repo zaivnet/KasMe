@@ -12,7 +12,7 @@
         <form method="POST" action="{{ route('transfers.store') }}" class="section-card accent-cyan mt-6">
             @csrf
             @include('transfers._form')
-            <button class="btn-primary mt-6">Buat transfer</button>
+            <button class="btn-primary mt-6 w-full sm:w-auto">Buat transfer</button>
         </form>
     @endif
 </div>

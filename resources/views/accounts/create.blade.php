@@ -6,7 +6,7 @@
     <h1 class="mt-4 text-3xl font-semibold tracking-tight">Tambah akun</h1>
     <form method="POST" action="{{ route('accounts.store') }}" class="section-card accent-cyan mt-6">@csrf
         @include('accounts._form')
-        <button class="btn-primary mt-6">Buat akun</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Buat akun</button>
     </form>
 </div>
 @endsection

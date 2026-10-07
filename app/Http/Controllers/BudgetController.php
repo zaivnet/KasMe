@@ -86,7 +86,7 @@ class BudgetController extends Controller
     {
         return $request->user()->categories()->where('type', 'expense')
             ->where(fn ($query) => $query->where('is_active', true)
-                ->when($includeCategory, fn ($query, $id) => $query->orWhereKey($id)))
+                ->when($includeCategory, fn ($query, $id) => $query->orWhere('id', $id)))
             ->orderBy('name')->get();
     }
 }

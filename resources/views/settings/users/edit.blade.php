@@ -44,9 +44,9 @@
             </div>
         @endif
 
-        <div class="flex items-center justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
-            <a href="{{ route('settings.users.index') }}" class="btn-secondary">Batal</a>
-            <button type="submit" class="btn-primary !bg-blue-600 hover:!bg-blue-700">Simpan Perubahan</button>
+        <div class="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-end gap-3 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <a href="{{ route('settings.users.index') }}" class="btn-secondary w-full sm:w-auto">Batal</a>
+            <button type="submit" class="btn-primary w-full sm:w-auto !bg-blue-600 hover:!bg-blue-700">Simpan Perubahan</button>
         </div>
     </form>
 

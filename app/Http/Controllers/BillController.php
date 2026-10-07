@@ -86,7 +86,7 @@ class BillController extends Controller
     {
         return $request->user()->categories()
             ->where(fn ($query) => $query->where('is_active', true)
-                ->when($includeCategory, fn ($query, $id) => $query->orWhereKey($id)))
+                ->when($includeCategory, fn ($query, $id) => $query->orWhere('id', $id)))
             ->orderBy('type')->orderBy('name')->get();
     }
 }

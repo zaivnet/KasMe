@@ -7,7 +7,7 @@
     <form method="POST" action="{{ route('debts.store') }}" class="section-card accent-rose mt-6">
         @csrf
         @include('debts._form')
-        <button class="btn-primary mt-6">Buat catatan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Buat catatan</button>
     </form>
 </div>
 @endsection

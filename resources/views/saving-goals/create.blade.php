@@ -7,7 +7,7 @@
     <form method="POST" action="{{ route('saving-goals.store') }}" class="section-card accent-violet mt-6">
         @csrf
         @include('saving-goals._form')
-        <button class="btn-primary mt-6">Buat target</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Buat target</button>
     </form>
 </div>
 @endsection

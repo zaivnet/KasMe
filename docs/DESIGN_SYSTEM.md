@@ -331,7 +331,12 @@ Mobile priorities:
 - Filters may collapse.
 - Tables may become cards.
 - Forms should use full width where practical.
-- Tap targets must be sufficiently large.
+- Tap targets must be sufficiently large (minimum >= 44x44px).
+- Fixed-Navigation Clearance: `<main id="main-content">` uses `.mobile-safe` with dynamic calculation:
+  `padding-bottom: calc(var(--mobile-nav-height, 4.5rem) + env(safe-area-inset-bottom, 0px) + 2rem);`
+  This guarantees all form actions and submit buttons remain 100% visible and scrollable above the bottom navigation bar across all mobile viewports (360x800, 390x844, 412x915).
+- Desktop Responsive Reset: On desktop (`@media (min-width: 1024px)`), `.mobile-safe` padding-bottom resets to `2rem` (32px), avoiding redundant whitespace.
+- FAB Visibility Rule: Mobile Floating Action Button (`#mobile-fab`) is strictly hidden on create and edit routes (`transactions.create`, `transactions.edit`, `*.create`, `*.edit`, `profile.edit`, `settings.edit`) to prevent collision with submit buttons, input fields, and attachment uploaders. It is visible only on browsing routes (e.g. Dashboard, Transactions index).
 
 ---
 
@@ -343,7 +348,8 @@ Minimum requirements:
 - Semantic HTML.
 - Keyboard-accessible controls.
 - Visible focus states.
-- Sufficient color contrast.
+- Sufficient color contrast (WCAG AA).
+- Minimum touch target 44x44px (`min-h-11`, `w-full sm:w-auto` for form buttons).
 - Icons must not be the only status signal where clarity matters.
 
 ---
@@ -365,6 +371,20 @@ Dark mode must preserve:
 - Form readability.
 - Badge semantics.
 - Border visibility.
+
+### Semantic Icon Badge Tokens
+
+To avoid washed-out pastel backgrounds or low contrast between icon foreground and badge container in dark mode, badges use high-contrast dark tokens with `dark:bg-none`:
+
+| Role / Semantic | Light Mode Badge | Dark Mode Badge | Dark Icon Foreground |
+|---|---|---|---|
+| **Saldo / Akun** | `bg-gradient-to-br from-blue-50 to-blue-100/70 border-blue-200/70 text-blue-700` | `dark:bg-none dark:bg-blue-950/60 dark:border-blue-800/60` | `dark:text-blue-400` |
+| **Pemasukan** | `bg-gradient-to-br from-emerald-50 to-emerald-100/70 border-emerald-200/70 text-emerald-700` | `dark:bg-none dark:bg-emerald-950/60 dark:border-emerald-800/60` | `dark:text-emerald-400` |
+| **Pengeluaran** | `bg-gradient-to-br from-rose-50 to-rose-100/70 border-rose-200/70 text-rose-700` | `dark:bg-none dark:bg-rose-950/60 dark:border-rose-800/60` | `dark:text-rose-400` |
+| **Net Cash Flow** | `bg-gradient-to-br from-violet-50 to-violet-100/70 border-violet-200/70 text-violet-700` | `dark:bg-none dark:bg-violet-950/60 dark:border-violet-800/60` | `dark:text-violet-400` |
+| **Transfer / Cyan** | `bg-gradient-to-br from-cyan-50 to-cyan-100/70 border-cyan-200/70 text-cyan-700` | `dark:bg-none dark:bg-cyan-950/60 dark:border-cyan-800/60` | `dark:text-cyan-400` |
+| **Anggaran / Amber** | `bg-gradient-to-br from-amber-50 to-amber-100/70 border-amber-200/70 text-amber-800` | `dark:bg-none dark:bg-amber-950/60 dark:border-amber-800/60` | `dark:text-amber-400` |
+| **Netral / Slate** | `bg-gradient-to-br from-slate-100 to-slate-200/70 border-slate-200/80 text-slate-700` | `dark:bg-none dark:bg-slate-800/60 dark:border-slate-700/60` | `dark:text-slate-300` |
 
 ---
 

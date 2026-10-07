@@ -67,7 +67,7 @@
             <strong>Catatan:</strong> Mengganti mata uang hanya mengubah preferensi tampilan dan nilai awal formulir akun baru. Aplikasi tidak melakukan konversi kurs terhadap data lama.
         </div>
 
-        <button class="btn-primary mt-6">Simpan pengaturan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Simpan pengaturan</button>
     </form>
 
     <section class="section-card accent-cyan mt-8">

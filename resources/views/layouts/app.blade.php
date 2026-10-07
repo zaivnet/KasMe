@@ -142,16 +142,18 @@
                 </div>
             </div>
         </header>
-        <main id="main-content" class="mobile-safe p-4 sm:p-6 lg:p-8">
+        <main id="main-content" class="mobile-safe px-4 pt-4 sm:px-6 sm:pt-6 lg:p-8">
             @include('components.flash-message')
             @yield('content')
         </main>
     </div>
 
+    @if(! request()->routeIs('transactions.create', 'transactions.edit', '*.create', '*.edit', 'profile.edit', 'settings.edit'))
     <!-- Mobile FAB -->
-    <a href="{{ route('transactions.create') }}" class="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-4 z-30 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-900/35 ring-2 ring-white/60 transition hover:scale-105 active:scale-95 dark:ring-teal-400/20 sm:hidden" aria-label="Tambah transaksi">
+    <a id="mobile-fab" href="{{ route('transactions.create') }}" class="fixed bottom-[calc(4.75rem+env(safe-area-inset-bottom))] right-4 z-30 grid h-14 w-14 place-items-center rounded-2xl bg-gradient-to-br from-emerald-500 via-teal-600 to-cyan-600 text-white shadow-lg shadow-teal-900/35 ring-2 ring-white/60 transition hover:scale-105 active:scale-95 dark:ring-teal-400/20 sm:hidden" aria-label="Tambah transaksi" title="Tambah transaksi (T)">
         <x-icon name="plus" size="6"/>
     </a>
+    @endif
 
     <!-- Mobile Bottom Navigation -->
     <nav class="bottom-safe fixed inset-x-0 bottom-0 z-40 grid grid-cols-5 border-t border-teal-100/80 bg-white/95 px-1 pt-1.5 shadow-[0_-4px_24px_-16px_rgba(13,148,136,.25)] backdrop-blur-xl dark:border-teal-950/60 dark:bg-slate-900/95 lg:hidden" aria-label="Navigasi bawah">

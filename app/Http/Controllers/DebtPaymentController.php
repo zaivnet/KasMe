@@ -30,7 +30,7 @@ class DebtPaymentController extends Controller
         return view('debts.payments.edit', [
             'debt' => $debt,
             'payment' => $payment,
-            'accounts' => $request->user()->accounts()->where(fn ($query) => $query->where('is_active', true)->orWhereKey($payment->account_id))->orderBy('name')->get(),
+            'accounts' => $request->user()->accounts()->where(fn ($query) => $query->where('is_active', true)->orWhere('id', $payment->account_id))->orderBy('name')->get(),
         ]);
     }
 

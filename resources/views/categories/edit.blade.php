@@ -8,7 +8,7 @@
         @csrf @method('PUT')
         @include('categories._form')
         <div class="mt-6 flex flex-wrap gap-3">
-            <button class="btn-primary">Simpan perubahan</button>
+            <button class="btn-primary w-full sm:w-auto">Simpan perubahan</button>
         </div>
     </form>
     @if($category->isUsed())

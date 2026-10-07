@@ -8,7 +8,7 @@
     <form method="POST" action="{{ route('bills.store') }}" class="section-card accent-amber mt-6">
         @csrf
         @include('bills._form')
-        <button class="btn-primary mt-6">Buat tagihan</button>
+        <button class="btn-primary mt-6 w-full sm:w-auto">Buat tagihan</button>
     </form>
 </div>
 @endsection
