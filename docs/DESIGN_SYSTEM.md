@@ -378,6 +378,7 @@ To avoid washed-out pastel backgrounds or low contrast between icon foreground a
 
 | Role / Semantic | Light Mode Badge | Dark Mode Badge | Dark Icon Foreground |
 |---|---|---|---|
+| **Kas Berjalan / Setoran (Teal)** | `bg-gradient-to-br from-teal-50 to-teal-100/70 border-teal-200/70 text-teal-700` | `dark:bg-none dark:bg-teal-950/60 dark:border-teal-800/60` | `dark:text-teal-400` |
 | **Saldo / Akun** | `bg-gradient-to-br from-blue-50 to-blue-100/70 border-blue-200/70 text-blue-700` | `dark:bg-none dark:bg-blue-950/60 dark:border-blue-800/60` | `dark:text-blue-400` |
 | **Pemasukan** | `bg-gradient-to-br from-emerald-50 to-emerald-100/70 border-emerald-200/70 text-emerald-700` | `dark:bg-none dark:bg-emerald-950/60 dark:border-emerald-800/60` | `dark:text-emerald-400` |
 | **Pengeluaran** | `bg-gradient-to-br from-rose-50 to-rose-100/70 border-rose-200/70 text-rose-700` | `dark:bg-none dark:bg-rose-950/60 dark:border-rose-800/60` | `dark:text-rose-400` |

@@ -59,6 +59,8 @@ Route::middleware(['auth', ApplyUserSettings::class])->group(function (): void {
     Route::resource('debts.payments', DebtPaymentController::class)->only(['store', 'edit', 'update', 'destroy'])->scoped();
     Route::resource('saving-goals', SavingGoalController::class);
     Route::resource('saving-goals.transactions', SavingGoalTransactionController::class)->only(['store', 'edit', 'update', 'destroy'])->scoped();
+    Route::post('/settlements/baseline', [\App\Http\Controllers\MonthlyCashSettlementController::class, 'setBaseline'])->name('settlements.baseline');
+    Route::resource('settlements', \App\Http\Controllers\MonthlyCashSettlementController::class)->only(['index', 'store', 'show', 'destroy']);
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password');

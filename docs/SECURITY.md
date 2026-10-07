@@ -45,6 +45,7 @@ Protected resources include:
 - Bills.
 - Debts.
 - Saving goals.
+- Monthly cash settlements (`MonthlyCashSettlementPolicy`).
 - Settings.
 - Attachments.
 

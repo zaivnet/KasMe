@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
     'backup_retention',
     'last_backup_at',
     'last_backup_status',
+    'cash_accountability_start_period',
 ])]
 class Setting extends Model
 {
@@ -49,6 +50,7 @@ class Setting extends Model
             'backup_schedule_enabled' => 'boolean',
             'backup_retention' => 'integer',
             'last_backup_at' => 'datetime',
+            'cash_accountability_start_period' => 'date',
         ];
     }
 
@@ -60,5 +62,41 @@ class Setting extends Model
     public function formatDate(?CarbonInterface $date): ?string
     {
         return $date?->locale('id')->translatedFormat($this->date_format);
+    }
+
+    /**
+     * Format a monetary decimal string for display without floating-point conversion.
+     *
+     * Preserves exact DECIMAL(18,2) precision up to 9999999999999999.99 without
+     * any intermediate float representation.
+     *
+     * @param  string|int|\Brick\Math\BigDecimal|mixed  $amount  Monetary value
+     */
+    public function formatMoney(mixed $amount): string
+    {
+        if ($amount === null || $amount === '') {
+            return '0.00';
+        }
+
+        try {
+            $decimal = \Brick\Math\BigDecimal::of((string) $amount)->toScale(2);
+        } catch (\Throwable) {
+            return '0.00';
+        }
+
+        $str = (string) $decimal;
+        $isNegative = str_starts_with($str, '-');
+        $abs = $isNegative ? substr($str, 1) : $str;
+
+        if (str_contains($abs, '.')) {
+            [$integerPart, $fractionalPart] = explode('.', $abs, 2);
+        } else {
+            $integerPart = $abs;
+            $fractionalPart = '00';
+        }
+
+        $formatted = preg_replace('/\B(?=(\d{3})+(?!\d))/', ',', $integerPart) . '.' . $fractionalPart;
+
+        return ($isNegative ? '-' : '') . $formatted;
     }
 }

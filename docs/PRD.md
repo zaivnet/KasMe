@@ -63,20 +63,24 @@ All application data must be scoped to the authenticated user.
 
 ---
 
-### 4.2 Dashboard
+### 4.2 Dashboard & Monthly Cash Accountability
 
-The dashboard should display:
+The dashboard provides clear operational cash accountability without conflating cumulative historical balances with current custodian responsibility.
 
-- Total balance.
-- Total income this month.
-- Total expenses this month.
-- Net cash flow.
-- Budget utilization.
-- Upcoming bills.
-- Recent transactions.
-- Income vs expense chart.
-- Expense by category chart.
-- Account summary.
+Primary summary cards:
+
+1. **Kas Belum Disetor**: Operational accountability cash held (`$outstandingCash`), answering "How much cash is currently under my custody and not yet handed over to the boss?". Calculated as `Current Period Cash + sum(historical closed period outstanding amounts)`.
+2. **Pemasukan Bulan Ini**: Total recorded income for the active period.
+3. **Pengeluaran Bulan Ini**: Total recorded expenses for the active period.
+4. **Saldo Kas Bulan Lalu**: Closing accountability balance of the preceding month, displaying settlement status (Sudah disetor / Disetor sebagian / Belum disetor), handover date, and modal CTA "Catat Setoran".
+
+Secondary sections:
+- **Ringkasan Akun**: Lists individual account balances and displays the cumulative accounting total (`totalBalance`) so full ledger balance remains accessible in a secondary position.
+- **Pemasukan vs Pengeluaran**: Daily cash flow chart for the period.
+- **Pengeluaran per Kategori**: Category expense doughnut chart.
+- **Ringkasan Anggaran**: Monthly budget utilization tracker.
+- **Tagihan Mendatang**: Due and overdue bills within 30 days.
+- **Transaksi Terbaru**: Recent chronological transactions.
 
 No dummy statistics may be displayed.
 
@@ -291,6 +295,20 @@ Settings may include:
 - Date format.
 - Theme.
 - Default dashboard preferences.
+
+---
+
+### 4.13 Monthly Cash Accountability & Setoran Bulanan
+
+Features:
+
+- Period-scoped cash accountability decoupling operational custody from cumulative accounting balances.
+- Settlement recording for closed months documenting cash handed over to supervisors/bosses.
+- Snapshot capture of period closing balance at settlement time.
+- Actual settled amount input with automatic discrepancy calculation (`period_balance_snapshot - settled_amount`).
+- Discrepancy detection alerting if transactions in a settled period are modified retroactively.
+- Closed-period validation guard rejecting settlement creation for current or future months.
+- Comprehensive settlement history with pagination and audit indicators.
 
 ---
 

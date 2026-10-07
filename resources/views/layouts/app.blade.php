@@ -28,6 +28,7 @@
             ['bill', 'bills.*', 'Tagihan'],
             ['debt', 'debts.*', 'Utang & Piutang'],
             ['goal', 'saving-goals.*', 'Target Tabungan'],
+            ['settlement', 'settlements.*', 'Setoran Kas'],
         ],
         'Sistem' => [
             ['settings', 'settings.*', 'Pengaturan'],
@@ -45,6 +46,7 @@
         'bill' => 'bills.index',
         'debt' => 'debts.index',
         'goal' => 'saving-goals.index',
+        'settlement' => 'settlements.index',
         'settings' => 'settings.edit',
         'user' => 'profile.edit',
     ];
@@ -193,6 +195,7 @@
                     ['bill', 'Tagihan', 'icon-badge-rose'],
                     ['debt', 'Utang & Piutang', 'icon-badge-blue'],
                     ['goal', 'Target Tabungan', 'icon-badge-emerald'],
+                    ['settlement', 'Setoran Kas', 'icon-badge-teal'],
                     ['settings', 'Pengaturan', 'icon-badge-slate'],
                     ['user', 'Profil', 'icon-badge-emerald'],
                 ] as [$icon, $label, $badgeClass])

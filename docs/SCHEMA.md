@@ -492,6 +492,7 @@ Columns:
 | date_format | VARCHAR(30) | default d M Y |
 | timezone | VARCHAR(100) | default Asia/Jakarta |
 | theme | VARCHAR(20) | default system |
+| cash_accountability_start_period | DATE | nullable, normalized start period for monthly cash accountability tracking (YYYY-MM-01) |
 | created_at | TIMESTAMP | |
 | updated_at | TIMESTAMP | |
 
@@ -502,6 +503,34 @@ light
 dark
 system
 ```
+
+---
+
+# monthly_cash_settlements
+
+Purpose:
+
+Stores periodic cash handover records documenting that closing cash from a closed period has been turned over to a supervisor or boss.
+
+Columns:
+
+| Column | Type | Rules |
+|---|---|---|
+| id | BIGINT UNSIGNED | PK, auto increment |
+| user_id | BIGINT UNSIGNED | FK -> users(id), cascade delete |
+| period | DATE | Normalized to first day of month (YYYY-MM-01) |
+| period_balance_snapshot | DECIMAL(18,2) | Server-recalculated period closing cash snapshot |
+| settled_amount | DECIMAL(18,2) | Actual monetary amount handed over |
+| settled_at | DATE | Date the cash handover took place |
+| notes | TEXT | Nullable remarks / context |
+| voided_at | TIMESTAMP | Nullable timestamp when settlement was voided/cancelled (audit preservation) |
+| void_reason | TEXT | Nullable explanation for voiding the settlement |
+| created_at | TIMESTAMP | Laravel default |
+| updated_at | TIMESTAMP | Laravel default |
+
+Indexes:
+- `UNIQUE (user_id, period)`: Guarantees one accountability settlement record per user per month.
+- `INDEX (user_id, settled_at)`: Optimizes settlement chronological reporting queries.
 
 ---
 

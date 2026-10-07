@@ -8,6 +8,54 @@ The format is inspired by Keep a Changelog principles.
 
 ## [Unreleased]
 
+### Sprint 19.5.1 — Production Baseline & Settlement Audit Hardening
+- **Monthly Cash Accountability Baseline**:
+  - Additive column `cash_accountability_start_period` (date nullable) on `settings` table.
+  - Safe Onboarding for Existing Installations: When baseline is uninitialized (`null`), historical periods prior to onboarding are NOT accumulated into *Outstanding Cash* (`$outstandingCash = $currentPeriodCash`).
+  - Explicit Activation Workflow: Dashboard renders "Aktifkan Pertanggungjawaban Kas" banner and modal when baseline is unset, explaining: *"Transaksi sebelum periode ini tetap tersimpan dan tetap muncul dalam laporan, tetapi tidak akan dianggap sebagai kas yang belum disetor."*
+  - Strict Baseline Filtering: Closed historical periods `< baseline` are strictly excluded from operational cash liability.
+  - Neutral Previous-Month Status: Card 4 displays neutral badge `"Sebelum pelacakan"` with label *"Periode sebelum pelacakan setoran"* when previous month is before baseline and has no settlement record (preventing false "Belum disetor" or "Sudah disetor" claims).
+  - Baseline Safety Guard: Server-side validation prevents setting baseline to future periods or moving baseline after earliest active settlement.
+- **Void/Cancel Settlement Semantics (Audit Hardening)**:
+  - Replaced hard physical delete with audit-safe void cancellation (`voided_at` timestamp nullable, `void_reason` text nullable on `monthly_cash_settlements`).
+  - Voided settlement records remain stored in database as permanent audit trail.
+  - Voided settlements no longer satisfy settlement state: period liability returns to outstanding cash.
+  - Re-settlement support: re-settling a previously voided period re-activates and updates existing record safely without violating `UNIQUE(user_id, period)` database constraint.
+  - Strict user isolation and policy authorization on void action and baseline setup.
+
+### Sprint 19.5 — Monthly Cash Accountability & Setoran Kas Bulanan
+- **Distinction of Four Financial Concepts**: Explicitly decoupled four fundamental financial values:
+  1. **Account Balance**: Cumulative accounting balance across user accounts (maintained in `AccountBalanceService`).
+  2. **Period Cash / Kas Berjalan**: Period-scoped liquid cash position reflecting mutations solely within the given month (`MonthlyCashService`).
+  3. **Outstanding Cash / Kas Belum Disetor**: Cumulative operational cash liability currently held and owed to superiors, calculated as `Current Period Cash + sum(historical closed period outstanding amounts)`.
+  4. **Monthly Settlement / Setoran Bulanan**: Accountability record documenting cash handed over to superiors at month-end (`MonthlyCashSettlement`). Monthly settlement is strictly an **accountability record** and NOT an expense, transfer, or ledger mutation.
+- **Dashboard Summary Redesign**: Replaced cumulative "Total Saldo" card from the 4 primary summary cards with:
+  1. **Kas Belum Disetor**: Operational accountability cash held (`$outstandingCash`), displaying carry-over breakdown if unsettled or partially settled balances exist from previous periods.
+  2. **Pemasukan Bulan Ini**: Period-scoped income (`$income`).
+  3. **Pengeluaran Bulan Ini**: Period-scoped expenses (`$expense`).
+  4. **Saldo Kas Bulan Lalu**: Closing accountability balance of previous month (`$previousPeriodCash`), with settlement status indicator ("Sudah disetor", "Disetor sebagian", vs "Belum disetor"), settlement handover date, discrepancy details, and CTA "Catat Setoran".
+- **Constant O(1) Query Strategy for Outstanding Cash**: Eliminated N+1 historical month iteration by executing 5 bulk database-level grouped queries across closed historical records, maintaining high performance even with multi-year datasets.
+- **Accounting Total Preserved**: Cumulative accounting total balance retained in secondary location within the "Ringkasan akun" header, ensuring accounting balance remains visible without misleading operational accountability.
+- **Strict Multi-Mutation Period Cash Formula**: Implemented `MonthlyCashService` calculating period cash with `Brick\Math\BigDecimal` scale 2 across:
+  - `+ Income`
+  - `- Expense`
+  - `+ Adjustment Increase`
+  - `- Adjustment Decrease`
+  - `- Transfer Fees` (internal transfer principal cancels out across user's accounts)
+  - `- Debt Repayments` (`debt.type == 'debt'`)
+  - `+ Receivable Collections` (`debt.type == 'receivable'`)
+  - `- Saving Goal Contributions`
+  - `+ Saving Goal Withdrawals`
+- **Monthly Cash Settlements Module**:
+  - Additive database table `monthly_cash_settlements` with `user_id`, `period`, `period_balance_snapshot`, `settled_amount`, `settled_at`, and `notes`.
+  - Unique compound index `(user_id, period)` preventing duplicate settlements per month.
+  - Closed-period validation guard strictly rejecting settlement creation for current or future months.
+  - Snapshot balance capture preserving calculated period balance at handover time.
+  - Explicit discrepancy tracking if settled amount differs from snapshot.
+  - Discrepancy detector flagging if historical transactions are modified after settlement without mutating the snapshot or silently adjusting balances.
+  - Routes (`/settlements`), history table with pagination, audit tags, and modal workflow.
+- **Security & User Isolation**: Full policy enforcement (`MonthlyCashSettlementPolicy`) ensuring complete user isolation.
+
 - Mobile Form Action Bottom Clearance: Global `--mobile-nav-height` (4.5rem) CSS variable and `.mobile-safe` padding-bottom calculation (`calc(var(--mobile-nav-height, 4.5rem) + env(safe-area-inset-bottom, 0px) + 2rem)`) on `<main id="main-content">`, preventing fixed bottom navigation and FAB from covering submit buttons and form inputs across all mobile viewports (360x800, 390x844, 412x915).
 - Desktop Responsive Padding Reset: `.mobile-safe` automatically resets to standard `2rem` (32px) on desktop viewports (`lg:min-width: 1024px`), eliminating redundant whitespace.
 - FAB Route Visibility Rule: Mobile Floating Action Button (FAB) is strictly hidden on create and edit routes (`transactions.create`, `transactions.edit`, `*.create`, `*.edit`, `profile.edit`, `settings.edit`), preventing touch collision with submit buttons, file attachment pickers, and input fields.

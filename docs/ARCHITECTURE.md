@@ -135,21 +135,62 @@ Avoid putting large orchestration logic inside models.
 
 The financial ledger is the source of truth.
 
-Account balance concept:
+### Distinction of Four Core Financial Concepts
 
-```text
-opening_balance
-+ total_income
-- total_expense
-+ incoming_transfers
-- outgoing_transfers
-- transfer_fees
-- debt_payments
-+ receivable_payments
-- saving_goal_contributions
-+ saving_goal_withdrawals
-+/- adjustments
-```
+1. **Account Balance (Saldo Akuntansi)**:
+   - Cumulative accounting balance across individual accounts and the entire system (`AccountBalanceService`).
+   - Represents the cumulative bank/cash assets across all time:
+     ```text
+     opening_balance
+     + total_income
+     - total_expense
+     + incoming_transfers
+     - outgoing_transfers
+     - transfer_fees
+     - debt_payments
+     + receivable_payments
+     - saving_goal_contributions
+     + saving_goal_withdrawals
+     +/- adjustments
+     ```
+
+2. **Period Cash / Kas Berjalan**:
+   - Liquid cash position reflecting net activity solely within a given calendar month (`MonthlyCashService::calculatePeriodCash`).
+   - Used for: closing balance of past months, settlement snapshot, period reports.
+   - Formula (strictly period-scoped; ignores historical opening balances):
+     ```text
+     + period_income
+     - period_expense
+     + period_adjustments_increase
+     - period_adjustments_decrease
+     - period_transfer_fees (transfer principal cancels out across user's accounts)
+     - period_debt_payments (outflow for debts owed)
+     + period_receivable_payments (inflow from receivables collected)
+     - period_saving_contributions (outflow to savings)
+     + period_saving_withdrawals (inflow from savings)
+     ```
+
+3. **Outstanding Cash / Kas Belum Disetor**:
+   - Cumulative operational cash liability currently held and owed to the boss/supervisor (`MonthlyCashService::calculateOutstandingCash`).
+   - Answering: *"How much cash is currently under my custody and not yet handed over to the boss?"*
+   - Formula:
+     ```text
+     Outstanding Cash =
+       Current Period Cash
+       + sum(historical closed period outstanding amounts)
+     ```
+   - For each closed historical period:
+     - If settled: `outstanding = period_balance_snapshot - settled_amount`
+     - If unsettled: `outstanding = calculated_period_cash`
+   - Preserves signed addition with `BigDecimal` (negative period deficits decrease liability).
+   - Historical edits after settlement do not alter the binding settlement snapshot; discrepancy warnings are raised for audit.
+   - Performance: Evaluated in constant O(1) query count via 5 bulk database-level grouped queries.
+
+4. **Monthly Settlement (Setoran Kas Bulanan)**:
+   - Operational accountability record documenting cash handed over to supervisors/bosses (`MonthlyCashSettlement`).
+   - **CRITICAL**: Monthly Settlement is strictly an **ACCOUNTABILITY RECORD**, NOT an expense, transfer, adjustment, or fake ledger transaction.
+   - Handing cash over to a boss is not an operational expense of the business/user.
+   - Preserves snapshot of calculated period closing balance at handover time, records actual settled amount, tracks discrepancies, and alerts if historical transactions in settled periods are subsequently modified.
 
 Do not trust frontend balance values.
 

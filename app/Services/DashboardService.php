@@ -12,6 +12,7 @@ class DashboardService
     public function __construct(
         private AccountBalanceService $balanceService,
         private BudgetUtilizationService $budgetUtilization,
+        private MonthlyCashService $monthlyCashService,
     ) {}
 
     public function forUser(User $user): array
@@ -25,6 +26,8 @@ class DashboardService
             fn (BigDecimal $total, string $balance) => $total->plus($balance),
             BigDecimal::zero(),
         )->toScale(2);
+
+        $monthlySummary = $this->monthlyCashService->summaryForDashboard($user);
 
         $monthlyTotals = $user->transactions()->whereDate('transaction_date', '>=', $start)->whereDate('transaction_date', '<=', $end)
             ->whereIn('type', ['income', 'expense'])->selectRaw('type, SUM(amount) AS total')
@@ -57,7 +60,7 @@ class DashboardService
         $upcomingBills = $user->bills()->with('category')->where('status', '!=', 'paid')
             ->whereDate('due_date', '<=', $now->addDays(30))->orderBy('due_date')->limit(6)->get();
 
-        return [
+        return array_merge([
             'periodLabel' => $now->locale('id')->translatedFormat('F Y'),
             'currency' => $user->setting->currency,
             'totalBalance' => (string) $totalBalance,
@@ -65,6 +68,7 @@ class DashboardService
             'expense' => (string) $expense,
             'fees' => (string) $fees,
             'netCashFlow' => (string) $income->minus($expense)->minus($fees)->toScale(2),
+        ], $monthlySummary, [
             'accounts' => $accounts,
             'balances' => $balances,
             'budgets' => $budgets,
@@ -83,6 +87,6 @@ class DashboardService
                 'labels' => $expensesByCategory->pluck('category_name')->all(),
                 'values' => $expensesByCategory->map(fn ($row) => (float) $row->total)->all(),
             ],
-        ];
+        ]);
     }
 }
